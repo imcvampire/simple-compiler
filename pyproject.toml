@@ -7,11 +7,10 @@ readme = "README.md"
 packages = [{include = "compiler", from = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
-black = "^24.1.0"
+python = "^3.12"
 
 [tool.poetry.group.dev.dependencies]
-autopep8 = "^2.0.4"
+black = "^24.1.0"
 mypy = "^1.7.0"
 pytest = "^7.4.2"
 

@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 from compiler.location import Location
 from compiler.token import Token, TokenType
@@ -15,7 +16,8 @@ def tokenize(source_code: str) -> list[Token]:
     i = 0
 
     while i < len(source_code):
-        match: re.Match[str] | None = None
+        match: Optional[re.Match[str]] = None
+
         if match := whitespace_re.match(source_code, i):
             pass
         elif match := identifier_re.match(source_code, i):
