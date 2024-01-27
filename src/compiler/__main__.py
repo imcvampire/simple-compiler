@@ -1,7 +1,8 @@
 import sys
 
 # TODO(student): add more commands as needed
-usage = f"""
+usage = (
+    f"""
 Usage: {sys.argv[0]} <command> [source_code_file]
 
 Command 'interpret':
@@ -9,17 +10,19 @@ Command 'interpret':
 
 Common arguments:
     source_code_file        Optional. Defaults to standard input if missing.
- """.strip() + "\n"
+ """.strip()
+    + "\n"
+)
 
 
 def main() -> int:
     command: str | None = None
     input_file: str | None = None
     for arg in sys.argv[1:]:
-        if arg in ['-h', '--help']:
+        if arg in ["-h", "--help"]:
             print(usage)
             return 0
-        elif arg.startswith('-'):
+        elif arg.startswith("-"):
             raise Exception(f"Unknown argument: {arg}")
         elif command is None:
             command = arg
@@ -39,7 +42,7 @@ def main() -> int:
         print(f"Error: command argument missing\n\n{usage}", file=sys.stderr)
         return 1
 
-    if command == 'interpret':
+    if command == "interpret":
         source_code = read_source_code()
         ...  # TODO(student)
     else:
@@ -48,5 +51,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())
