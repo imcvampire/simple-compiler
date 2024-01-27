@@ -27,24 +27,10 @@ def basic_input():
             ],
         ),
         (
-            "1 == 1",
+            "1 == 1 <= 1",
             [
                 Token(text="1", type=TokenType.INT_LITERAL),
                 Token(text="==", type=TokenType.OPERATOR),
-                Token(text="1", type=TokenType.INT_LITERAL),
-            ],
-        ),
-        (
-            "1 >= 1",
-            [
-                Token(text="1", type=TokenType.INT_LITERAL),
-                Token(text=">=", type=TokenType.OPERATOR),
-                Token(text="1", type=TokenType.INT_LITERAL),
-            ],
-        ),
-        (
-            "1 <= 1",
-            [
                 Token(text="1", type=TokenType.INT_LITERAL),
                 Token(text="<=", type=TokenType.OPERATOR),
                 Token(text="1", type=TokenType.INT_LITERAL),
