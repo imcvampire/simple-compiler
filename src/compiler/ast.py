@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Expression:
-    """Base class for AST nodes representing expressions."""
+    pass
 
 
 @dataclass
@@ -19,8 +19,6 @@ class Identifier(Expression):
 
 @dataclass
 class BinaryOp(Expression):
-    """AST node for a binary operation like `A + B`"""
-
     left: Expression
     op: str
     right: Expression
