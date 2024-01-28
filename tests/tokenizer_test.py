@@ -63,5 +63,5 @@ comment. */""",
 
 
 @pytest.mark.parametrize("test_input,expected", test_cases())
-def test_tokenizer_tokenize(test_input: str, expected: list[str]) -> None:
+def test_tokenizer_tokenize(test_input: str, expected: list[Token]) -> None:
     assert tokenize(test_input) == expected

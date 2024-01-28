@@ -61,12 +61,23 @@ def parse(tokens: list[Token]) -> ast.Expression:
         token = consume()
         return ast.Literal(token.text)
 
-    def parse_term() -> ast.Literal:
+    def parse_term() -> ast.Expression:
         if peek().type == TokenType.END:
             return Literal(None)
 
+        left = parse_factor()
+        while peek().text in ["*", "/"]:
+            operator_token = consume()
+            operator = operator_token.text
+            right = parse_factor()
+            left = ast.BinaryOp(left, operator, right)
+        return left
+
+    def parse_factor() -> ast.Expression:
         if peek().text == "=":
             return parse_equal()
+        elif peek().text == "(":
+            return parse_parenthesized()
         elif peek().type == TokenType.INT_LITERAL:
             return parse_int_literal()
         elif peek().type == TokenType.IDENTIFIER:
@@ -76,25 +87,13 @@ def parse(tokens: list[Token]) -> ast.Expression:
                 f"{peek().location}: wrong token, got: {peek().type}: {peek().text}"
             )
 
-    def parse_factor() -> ast.Expression:
-        if peek().text == "(":
-            return parse_parenthesized()
-        elif peek().type == TokenType.INT_LITERAL:
-            return parse_int_literal()
-        elif peek().type == TokenType.IDENTIFIER:
-            return parse_identifier()
-        else:
-            raise Exception(
-                f'{peek().location}: expected "(", an integer literal or an identifier'
-            )
-
     def parse_parenthesized() -> ast.Expression:
         consume("(")
         expr = parse_expression()
         consume(")")
         return expr
 
-    def parse_expression() -> ast.BinaryOp:
+    def parse_expression() -> ast.Expression:
         left = parse_term()
 
         while peek().type != TokenType.END:
