@@ -40,6 +40,22 @@ def test_cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            "(1 + 2) - 3",
+            BinaryOp(
+                left=BinaryOp(left=Literal(value=1), op="+", right=Literal(value=2)),
+                op="-",
+                right=Literal(value=3),
+            ),
+        ),
+        (
+            "1 + (2 - 3)",
+            BinaryOp(
+                left=Literal(value=1),
+                op="+",
+                right=BinaryOp(left=Literal(value=2), op="-", right=Literal(value=3)),
+            ),
+        ),
+        (
             "",
             Literal(None),
         ),

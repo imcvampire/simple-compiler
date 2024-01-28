@@ -111,6 +111,8 @@ def parse(tokens: list[Token]) -> ast.Expression:
                 right = parse_term()
 
                 left = ast.BinaryOp(left, operator, right)
+            elif peek().text in [")"]:
+                return left
             else:
                 raise Exception(f"{peek().location}: wrong token: {peek().text}")
 
