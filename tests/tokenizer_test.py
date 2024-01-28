@@ -4,7 +4,7 @@ from compiler.token import Token, TokenType
 from compiler.tokenizer import tokenize
 
 
-def basic_input():
+def basic_input() -> list[tuple[str, list[Token]]]:
     return [
         (
             "if  3\nwhile",
@@ -39,9 +39,28 @@ def basic_input():
                 Token(text="1", type=TokenType.INT_LITERAL),
             ],
         ),
+        (
+            """/* Another
+comment. */
+
+1 # dfgdfgreter
+
+2 // dfgfdgdfgfdggfd""",
+            [
+                Token(
+                    text="""/* Another
+comment. */""",
+                    type=TokenType.COMMENT,
+                ),
+                Token(text="1", type=TokenType.INT_LITERAL),
+                Token(text="# dfgdfgreter", type=TokenType.COMMENT),
+                Token(text="2", type=TokenType.INT_LITERAL),
+                Token(text="// dfgfdgdfgfdggfd", type=TokenType.COMMENT),
+            ],
+        ),
     ]
 
 
 @pytest.mark.parametrize("test_input,expected", basic_input())
-def test_tokenizer_basics(test_input: str, expected: list[str]):
+def test_tokenizer_basics(test_input: str, expected: list[str]) -> None:
     assert tokenize(test_input) == expected
