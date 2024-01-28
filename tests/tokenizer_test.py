@@ -15,7 +15,7 @@ def basic_input():
             ],
         ),
         (
-            "1 - 10 >= 1 / 1",
+            "1 - 10 >= 1 / 1;",
             [
                 Token(text="1", type=TokenType.INT_LITERAL),
                 Token(text="-", type=TokenType.OPERATOR),
@@ -24,14 +24,17 @@ def basic_input():
                 Token(text="1", type=TokenType.INT_LITERAL),
                 Token(text="/", type=TokenType.OPERATOR),
                 Token(text="1", type=TokenType.INT_LITERAL),
+                Token(text=";", type=TokenType.PUNCTUATION),
             ],
         ),
         (
-            "1 == 1 <= 1",
+            "(1 == 1) <= 1",
             [
+                Token(text="(", type=TokenType.PUNCTUATION),
                 Token(text="1", type=TokenType.INT_LITERAL),
                 Token(text="==", type=TokenType.OPERATOR),
                 Token(text="1", type=TokenType.INT_LITERAL),
+                Token(text=")", type=TokenType.PUNCTUATION),
                 Token(text="<=", type=TokenType.OPERATOR),
                 Token(text="1", type=TokenType.INT_LITERAL),
             ],

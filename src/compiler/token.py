@@ -9,6 +9,7 @@ class TokenType(Enum):
     IDENTIFIER = 1
     INT_LITERAL = 2
     OPERATOR = 3
+    PUNCTUATION = 4
 
 
 @dataclass
