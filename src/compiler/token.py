@@ -6,6 +6,7 @@ from enum import Enum
 
 
 class TokenType(Enum):
+    END = 0
     IDENTIFIER = 1
     INT_LITERAL = 2
     OPERATOR = 3

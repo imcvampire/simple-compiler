@@ -1,7 +1,8 @@
 import pytest
 
+from compiler.ast import Literal, BinaryOp
 from compiler.token import Token, TokenType
-from compiler.tokenizer import tokenize
+from compiler.tokenizer import tokenize, parse
 
 
 def basic_input() -> list[tuple[str, list[Token]]]:
@@ -62,5 +63,8 @@ comment. */""",
 
 
 @pytest.mark.parametrize("test_input,expected", basic_input())
-def test_tokenizer_basics(test_input: str, expected: list[str]) -> None:
+def test_tokenizer_tokenize(test_input: str, expected: list[str]) -> None:
     assert tokenize(test_input) == expected
+
+def test_tokenizer_parse() -> None:
+    assert parse(tokenize("a + 1")) == BinaryOp(left=Literal(value='a'), op='+', right=Literal(value=1))

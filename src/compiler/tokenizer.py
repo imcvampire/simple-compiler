@@ -1,6 +1,8 @@
 import re
 from typing import Optional
 
+from compiler import ast
+from compiler.ast import Literal
 from compiler.location import Location
 from compiler.token import Token, TokenType
 
@@ -38,3 +40,62 @@ def tokenize(source_code: str) -> list[Token]:
         i = match.end()
 
     return result
+
+
+def parse(tokens: list[Token]) -> ast.Expression:
+    pos = 0
+
+    def peek() -> Token:
+        if pos < len(tokens):
+            return tokens[pos]
+        else:
+            return Token(
+                location=tokens[-1].location,
+                type=TokenType.END,
+                text="",
+            )
+
+    def consume(expected: str | list[str] | None = None) -> Token:
+        token = peek()
+        if isinstance(expected, str) and token.text != expected:
+            raise Exception(f'{token.location}: expected "{expected}"')
+        if isinstance(expected, list) and token.text not in expected:
+            comma_separated = ", ".join([f'"{e}"' for e in expected])
+            raise Exception(f'{token.location}: expected one of: {comma_separated}')
+
+        nonlocal pos
+        pos += 1
+
+        return token
+
+    def parse_int_literal() -> ast.Literal:
+        if peek().type != TokenType.INT_LITERAL:
+            raise Exception(f'{peek().location}: expected an integer literal')
+        token = consume()
+        return ast.Literal(int(token.text))
+
+    def parse_identifier() -> Literal:
+        if peek().type != TokenType.IDENTIFIER:
+            raise Exception(f'{peek().location}: expected an identifier')
+        token = consume()
+        return ast.Literal(token.text)
+
+    def parse_term() -> ast.Expression:
+        if peek().type == TokenType.INT_LITERAL:
+            return parse_int_literal()
+        elif peek().type == TokenType.IDENTIFIER:
+            return parse_identifier()
+        else:
+            raise Exception(f'{peek().location}: expected an integer literal or an identifier')
+
+    def parse_expression() -> ast.Expression:
+        left = parse_term()
+        operator_token = consume(['+', '-'])
+        right = parse_term()
+        return ast.BinaryOp(
+            left,
+            operator_token.text,
+            right
+        )
+
+    return parse_expression()
