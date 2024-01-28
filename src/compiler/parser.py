@@ -77,7 +77,7 @@ def parse(tokens: list[Token]) -> ast.Expression:
         if peek().text == "=":
             return parse_equal()
         elif peek().text == "(":
-            return parse_parenthesized()
+            return parse_parenthesized_expression()
         elif peek().text == "if":
             return parse_if_expression()
         elif peek().type == TokenType.INT_LITERAL:
@@ -89,7 +89,7 @@ def parse(tokens: list[Token]) -> ast.Expression:
                 f"{peek().location}: wrong token, got: {peek().type}: {peek().text}"
             )
 
-    def parse_parenthesized() -> ast.Expression:
+    def parse_parenthesized_expression() -> ast.Expression:
         consume("(")
         expr = parse_expression()
         consume(")")
