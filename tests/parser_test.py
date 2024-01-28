@@ -1,6 +1,6 @@
 import pytest
 
-from compiler.ast import Literal, BinaryOp, Expression
+from compiler.ast import Literal, BinaryOp, Expression, IfExpression
 from compiler.parser import parse
 from compiler.tokenizer import tokenize
 
@@ -53,6 +53,18 @@ def test_cases() -> list[tuple[str, Expression]]:
                 left=Literal(value=1),
                 op="+",
                 right=BinaryOp(left=Literal(value=2), op="-", right=Literal(value=3)),
+            ),
+        ),
+        (
+            "a = if 1 then 3 else 4",
+            BinaryOp(
+                left=Literal(value="a"),
+                op="=",
+                right=IfExpression(
+                    condition=Literal(value=1),
+                    then_clause=Literal(value=3),
+                    else_clause=Literal(value=4),
+                ),
             ),
         ),
         (

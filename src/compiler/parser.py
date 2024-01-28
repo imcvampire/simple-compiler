@@ -78,6 +78,8 @@ def parse(tokens: list[Token]) -> ast.Expression:
             return parse_equal()
         elif peek().text == "(":
             return parse_parenthesized()
+        elif peek().text == "if":
+            return parse_if_expression()
         elif peek().type == TokenType.INT_LITERAL:
             return parse_int_literal()
         elif peek().type == TokenType.IDENTIFIER:
@@ -92,6 +94,18 @@ def parse(tokens: list[Token]) -> ast.Expression:
         expr = parse_expression()
         consume(")")
         return expr
+
+    def parse_if_expression() -> ast.Expression:
+        consume("if")
+        condition = parse_expression()
+        consume("then")
+        then_clause = parse_expression()
+        if peek().text == "else":
+            consume("else")
+            else_clause = parse_expression()
+        else:
+            else_clause = None
+        return ast.IfExpression(condition, then_clause, else_clause)
 
     def parse_expression() -> ast.Expression:
         left = parse_term()
@@ -111,10 +125,8 @@ def parse(tokens: list[Token]) -> ast.Expression:
                 right = parse_term()
 
                 left = ast.BinaryOp(left, operator, right)
-            elif peek().text in [")"]:
-                return left
             else:
-                raise Exception(f"{peek().location}: wrong token: {peek().text}")
+                return left
 
         return left
 
