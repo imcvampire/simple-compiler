@@ -56,12 +56,35 @@ def test_cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            "a = if 1 then 2",
+            BinaryOp(
+                left=Literal(value="a"),
+                op="=",
+                right=IfExpression(
+                    condition=Literal(value=1),
+                    then_clause=Literal(value=2),
+                ),
+            ),
+        ),
+        (
             "a = if 1 then 3 else 4",
             BinaryOp(
                 left=Literal(value="a"),
                 op="=",
                 right=IfExpression(
                     condition=Literal(value=1),
+                    then_clause=Literal(value=3),
+                    else_clause=Literal(value=4),
+                ),
+            ),
+        ),
+        (
+          "1 + if 2 then 3 else 4",
+            BinaryOp(
+                left=Literal(value=1),
+                op="+",
+                right=IfExpression(
+                    condition=Literal(value=2),
                     then_clause=Literal(value=3),
                     else_clause=Literal(value=4),
                 ),
