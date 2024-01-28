@@ -2,10 +2,10 @@ import pytest
 
 from compiler.ast import Literal, BinaryOp
 from compiler.token import Token, TokenType
-from compiler.tokenizer import tokenize, parse
+from compiler.tokenizer import tokenize
 
 
-def basic_input() -> list[tuple[str, list[Token]]]:
+def test_cases() -> list[tuple[str, list[Token]]]:
     return [
         (
             "if  3\nwhile",
@@ -62,12 +62,6 @@ comment. */""",
     ]
 
 
-@pytest.mark.parametrize("test_input,expected", basic_input())
+@pytest.mark.parametrize("test_input,expected", test_cases())
 def test_tokenizer_tokenize(test_input: str, expected: list[str]) -> None:
     assert tokenize(test_input) == expected
-
-
-def test_tokenizer_parse() -> None:
-    assert parse(tokenize("a + 1")) == BinaryOp(
-        left=Literal(value="a"), op="+", right=Literal(value=1)
-    )

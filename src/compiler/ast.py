@@ -9,7 +9,6 @@ class Expression:
 @dataclass
 class Literal(Expression):
     value: str | int | bool | None
-    # (value=None is used when parsing the keyword `unit`)
 
 
 @dataclass
