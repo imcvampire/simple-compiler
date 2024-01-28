@@ -61,7 +61,7 @@ def parse(tokens: list[Token]) -> ast.Expression:
             raise Exception(f'{token.location}: expected "{expected}"')
         if isinstance(expected, list) and token.text not in expected:
             comma_separated = ", ".join([f'"{e}"' for e in expected])
-            raise Exception(f'{token.location}: expected one of: {comma_separated}')
+            raise Exception(f"{token.location}: expected one of: {comma_separated}")
 
         nonlocal pos
         pos += 1
@@ -70,13 +70,13 @@ def parse(tokens: list[Token]) -> ast.Expression:
 
     def parse_int_literal() -> ast.Literal:
         if peek().type != TokenType.INT_LITERAL:
-            raise Exception(f'{peek().location}: expected an integer literal')
+            raise Exception(f"{peek().location}: expected an integer literal")
         token = consume()
         return ast.Literal(int(token.text))
 
     def parse_identifier() -> Literal:
         if peek().type != TokenType.IDENTIFIER:
-            raise Exception(f'{peek().location}: expected an identifier')
+            raise Exception(f"{peek().location}: expected an identifier")
         token = consume()
         return ast.Literal(token.text)
 
@@ -86,16 +86,14 @@ def parse(tokens: list[Token]) -> ast.Expression:
         elif peek().type == TokenType.IDENTIFIER:
             return parse_identifier()
         else:
-            raise Exception(f'{peek().location}: expected an integer literal or an identifier')
+            raise Exception(
+                f"{peek().location}: expected an integer literal or an identifier"
+            )
 
     def parse_expression() -> ast.Expression:
         left = parse_term()
-        operator_token = consume(['+', '-'])
+        operator_token = consume(["+", "-"])
         right = parse_term()
-        return ast.BinaryOp(
-            left,
-            operator_token.text,
-            right
-        )
+        return ast.BinaryOp(left, operator_token.text, right)
 
     return parse_expression()

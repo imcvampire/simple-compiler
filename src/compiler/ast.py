@@ -20,6 +20,7 @@ class Identifier(Expression):
 @dataclass
 class BinaryOp(Expression):
     """AST node for a binary operation like `A + B`"""
+
     left: Expression
     op: str
     right: Expression

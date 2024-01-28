@@ -66,5 +66,8 @@ comment. */""",
 def test_tokenizer_tokenize(test_input: str, expected: list[str]) -> None:
     assert tokenize(test_input) == expected
 
+
 def test_tokenizer_parse() -> None:
-    assert parse(tokenize("a + 1")) == BinaryOp(left=Literal(value='a'), op='+', right=Literal(value=1))
+    assert parse(tokenize("a + 1")) == BinaryOp(
+        left=Literal(value="a"), op="+", right=Literal(value=1)
+    )
