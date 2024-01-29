@@ -28,3 +28,9 @@ class IfExpression(Expression):
     condition: Expression
     then_clause: Expression
     else_clause: Expression | None = None
+
+
+@dataclass
+class FunctionExpression(Expression):
+    name: str
+    arguments: list[Expression]

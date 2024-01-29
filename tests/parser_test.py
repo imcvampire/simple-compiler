@@ -1,11 +1,11 @@
 import pytest
 
-from compiler.ast import Literal, BinaryOp, Expression, IfExpression
-from compiler.parser import parse
+from compiler.ast import Literal, BinaryOp, Expression, IfExpression, FunctionExpression
+from compiler.parser import parse, EndOfInputException
 from compiler.tokenizer import tokenize
 
 
-def test_cases() -> list[tuple[str, Expression]]:
+def cases() -> list[tuple[str, Expression]]:
     return [
         ("1 + 2", BinaryOp(left=Literal(value=1), op="+", right=Literal(value=2))),
         ("a = 1", BinaryOp(left=Literal(value="a"), op="=", right=Literal(value=1))),
@@ -91,12 +91,40 @@ def test_cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            "f(a, 1)",
+            FunctionExpression(
+                name="f", arguments=[Literal(value="a"), Literal(value=1)]
+            ),
+        ),
+        (
+            "a = f(b, 1)",
+            BinaryOp(
+                left=Literal(value="a"),
+                op="=",
+                right=FunctionExpression(
+                    name="f", arguments=[Literal(value="b"), Literal(value=1)]
+                ),
+            ),
+        ),
+        (
             "",
             Literal(None),
         ),
     ]
 
 
-@pytest.mark.parametrize("test_input,expected", test_cases())
+@pytest.mark.parametrize("test_input,expected", cases())
 def test_parser_parse(test_input: str, expected: Expression) -> None:
     assert parse(tokenize(test_input)) == expected
+
+
+def error_cases() -> list[tuple[str, Exception]]:
+    return [("a + b c", EndOfInputException)]
+
+
+@pytest.mark.parametrize("test_input,expected_exception", error_cases())
+def test_parser_parse_error(test_input, expected_exception: Exception) -> None:
+    with pytest.raises(Exception) as e:
+        parse(tokenize(test_input))
+
+    assert e.type is expected_exception
