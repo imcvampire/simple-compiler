@@ -79,14 +79,14 @@ def test_cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
-          "1 + if 2 then 3 else 4",
+            "1 + if true then 2 else 3",
             BinaryOp(
                 left=Literal(value=1),
                 op="+",
                 right=IfExpression(
-                    condition=Literal(value=2),
-                    then_clause=Literal(value=3),
-                    else_clause=Literal(value=4),
+                    condition=Literal(value="true"),
+                    then_clause=Literal(value=2),
+                    else_clause=Literal(value=3),
                 ),
             ),
         ),

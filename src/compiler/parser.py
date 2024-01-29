@@ -66,6 +66,7 @@ def parse(tokens: list[Token]) -> ast.Expression:
             return Literal(None)
 
         left = parse_factor()
+        # TODO: generalize this operator
         while peek().text in ["*", "/"]:
             operator_token = consume()
             operator = operator_token.text
@@ -118,6 +119,7 @@ def parse(tokens: list[Token]) -> ast.Expression:
                 right = parse_expression()
 
                 left = ast.BinaryOp(left, operator, right)
+            # TODO: generalize this operator
             elif peek().text in ["+", "-"]:
                 operator_token = consume()
                 operator = operator_token.text
