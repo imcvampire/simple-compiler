@@ -1,11 +1,7 @@
 from compiler import ast
 from compiler.ast import Literal
+from compiler.parser_exception import EndOfInputException
 from compiler.token import Token, TokenType
-
-
-class EndOfInputException(Exception):
-    pass
-
 
 left_associative_binary_operators = [
     ["or"],
@@ -16,8 +12,9 @@ left_associative_binary_operators = [
     ["*", "/"],
 ]
 
+# left_associative_binary_operators.reverse()
 
-def get_precedence(operator: str, current_level: int = 0) -> int:
+def get_left_associative_binary_operator_level(operator: str, current_level: int = 0) -> int:
     for level, operators in enumerate(left_associative_binary_operators, start=current_level):
         if operator in operators:
             return level
@@ -91,16 +88,6 @@ def parse(tokens: list[Token]) -> ast.Expression:
         token = consume()
         return ast.Literal(token.text)
 
-    def parse_term() -> ast.Expression:
-        left = parse_leaf_construct()
-        # TODO: generalize this operator
-        while peek().text in ["*", "/"]:
-            operator_token = consume()
-            operator = operator_token.text
-            right = parse_leaf_construct()
-            left = ast.BinaryOp(left, operator, right)
-        return left
-
     def parse_parenthesized_expression() -> ast.Expression:
         consume("(")
         expr = parse_expression()
@@ -156,24 +143,26 @@ def parse(tokens: list[Token]) -> ast.Expression:
                 f"{peek().location}: wrong token, got: {peek().type}: {peek().text}"
             )
 
-    def parse_expression() -> ast.Expression:
-        left = parse_leaf_construct()
-
-        # while peek().type != TokenType.END:
+    def parse_token(left: ast.Expression) -> ast.Expression:
         while True:
-            if peek().text in ["="]: # right-associative
+            if peek().text in ["="]:  # right-associative
                 operator_token = consume()
                 operator = operator_token.text
                 right = parse_expression()
                 left = ast.BinaryOp(left, operator, right)
             # TODO: generalize this operator
-            elif (precedence := get_precedence(peek().text)) >= 0:
+            elif (level := get_left_associative_binary_operator_level(peek().text)) >= 0:
                 operator_token = consume()
                 operator = operator_token.text
-                right = parse_term()
+                right = parse_leaf_construct()
                 left = ast.BinaryOp(left, operator, right)
             else:
                 return left
+
+    def parse_expression() -> ast.Expression:
+        left = parse_leaf_construct()
+
+        return parse_token(left)
 
     expression = parse_expression()
 

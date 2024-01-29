@@ -1,7 +1,8 @@
 import pytest
 
 from compiler.ast import Literal, BinaryOp, Expression, IfExpression, FunctionExpression
-from compiler.parser import parse, EndOfInputException
+from compiler.parser import parse
+from compiler.parser_exception import EndOfInputException
 from compiler.tokenizer import tokenize
 
 
@@ -104,6 +105,54 @@ def cases() -> list[tuple[str, Expression]]:
                 right=FunctionExpression(
                     name="f", arguments=[Literal(value="b"), Literal(value=1)]
                 ),
+            ),
+        ),
+        (
+            "1 or a",
+            BinaryOp(
+                left=Literal(value=1),
+                op="or",
+                right=Literal(value="a"),
+            ),
+        ),
+        (
+          "a and b",
+            BinaryOp(
+                left=Literal(value="a"),
+                op="and",
+                right=Literal(value="b"),
+            ),
+        ),
+        (
+            "a == 1",
+            BinaryOp(
+                left=Literal(value="a"),
+                op="==",
+                right=Literal(value=1),
+            ),
+        ),
+        (
+            "a and b != 1",
+            BinaryOp(
+                left=Literal(value="a"),
+                op="and",
+                right=BinaryOp(
+                    left=Literal(value="b"),
+                    op="!=",
+                    right=Literal(value=1),
+                ),
+            ),
+        ),
+        (
+            "a != 1 and 2",
+            BinaryOp(
+                left=BinaryOp(
+                    left=Literal(value="a"),
+                    op="!=",
+                    right=Literal(value="a"),
+                ),
+                op="and",
+                right=Literal(value="b"),
             ),
         ),
         (

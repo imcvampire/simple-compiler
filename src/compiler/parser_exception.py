@@ -1,0 +1,2 @@
+class EndOfInputException(Exception):
+    pass
