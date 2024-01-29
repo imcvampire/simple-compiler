@@ -17,6 +17,13 @@ left_associative_binary_operators = [
 ]
 
 
+def get_precedence(operator: str, current_level: int = 0) -> int:
+    for level, operators in enumerate(left_associative_binary_operators, start=current_level):
+        if operator in operators:
+            return level
+    return -1
+
+
 def parse(tokens: list[Token]) -> ast.Expression:
     pos = 0
 
@@ -85,15 +92,12 @@ def parse(tokens: list[Token]) -> ast.Expression:
         return ast.Literal(token.text)
 
     def parse_term() -> ast.Expression:
-        if peek().type == TokenType.END:
-            return Literal(None)
-
-        left = parse_factor()
+        left = parse_leaf_construct()
         # TODO: generalize this operator
         while peek().text in ["*", "/"]:
             operator_token = consume()
             operator = operator_token.text
-            right = parse_factor()
+            right = parse_leaf_construct()
             left = ast.BinaryOp(left, operator, right)
         return left
 
@@ -132,8 +136,10 @@ def parse(tokens: list[Token]) -> ast.Expression:
 
         return ast.FunctionExpression(function_name, arguments)
 
-    def parse_factor() -> ast.Expression:
-        if peek().text == "=":
+    def parse_leaf_construct() -> ast.Expression:
+        if peek().type == TokenType.END:
+            return Literal(None)
+        elif peek().text == "=":
             return parse_equal()
         elif peek().text == "(":
             return parse_parenthesized_expression()
@@ -151,24 +157,20 @@ def parse(tokens: list[Token]) -> ast.Expression:
             )
 
     def parse_expression() -> ast.Expression:
-        left = parse_term()
+        left = parse_leaf_construct()
 
         # while peek().type != TokenType.END:
         while True:
-            if peek().text in ["="]:
+            if peek().text in ["="]: # right-associative
                 operator_token = consume()
                 operator = operator_token.text
-
                 right = parse_expression()
-
                 left = ast.BinaryOp(left, operator, right)
             # TODO: generalize this operator
-            elif peek().text in ["+", "-"]:
+            elif (precedence := get_precedence(peek().text)) >= 0:
                 operator_token = consume()
                 operator = operator_token.text
-
                 right = parse_term()
-
                 left = ast.BinaryOp(left, operator, right)
             else:
                 return left
