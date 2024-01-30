@@ -1,7 +1,13 @@
-from compiler import ast
-from compiler.ast import Literal
+from compiler.ast import (
+    Literal,
+    BlockExpression,
+    Expression,
+    IfExpression,
+    FunctionExpression,
+    BinaryOp,
+)
 from compiler.parser_exception import EndOfInputException
-from compiler.token import Token, TokenType
+from compiler.token import Token, TokenType, Tokens
 
 left_associative_binary_operators = [
     ["or"],
@@ -27,161 +33,137 @@ def get_left_associative_binary_operator_level(
     return -1
 
 
-def parse(tokens: list[Token]) -> ast.Expression:
-    pos = 0
-
-    def peek() -> Token:
-        if pos < len(tokens):
-            return tokens[pos]
-        elif len(tokens) == 0:
-            return Token(
-                type=TokenType.END,
-                text="",
-            )
-        else:
-            return Token(
-                location=tokens[-1].location,
-                type=TokenType.END,
-                text="",
-            )
-
-    def next_token() -> Token:
-        nonlocal pos
-        next_pos = pos + 1
-
-        if next_pos < len(tokens):
-            return tokens[next_pos]
-        elif len(tokens) == 0:
-            return Token(
-                type=TokenType.END,
-                text="",
-            )
-        else:
-            return Token(
-                location=tokens[-1].location,
-                type=TokenType.END,
-                text="",
-            )
-
-    def consume(expected: str | list[str] | None = None) -> Token:
-        token = peek()
-        if isinstance(expected, str) and token.text != expected:
-            raise Exception(f'{token.location}: expected "{expected}"')
-        if isinstance(expected, list) and token.text not in expected:
-            comma_separated = ", ".join([f'"{e}"' for e in expected])
-            raise Exception(f"{token.location}: expected one of: {comma_separated}")
-
-        nonlocal pos
-        pos += 1
-
-        return token
-
-    def parse_int_literal() -> ast.Literal:
-        if peek().type != TokenType.INT_LITERAL:
-            raise Exception(f"{peek().location}: expected an integer literal")
-        token = consume()
-        return ast.Literal(int(token.text))
+def parse(tokens: Tokens) -> Expression:
+    def parse_int_literal() -> Literal:
+        if tokens.peek().type != TokenType.INT_LITERAL:
+            raise Exception(f"{tokens.peek().location}: expected an integer literal")
+        token = tokens.consume()
+        return Literal(int(token.text))
 
     def parse_identifier() -> Literal:
-        if peek().type != TokenType.IDENTIFIER:
-            raise Exception(f"{peek().location}: expected an identifier")
-        token = consume()
-        return ast.Literal(token.text)
+        if tokens.peek().type != TokenType.IDENTIFIER:
+            raise Exception(f"{tokens.peek().location}: expected an identifier")
+        token = tokens.consume()
+        return Literal(token.text)
 
     def parse_equal() -> Literal:
-        if peek().text != "=":
-            raise Exception(f"{peek().location}: expected an equal sign")
-        token = consume()
-        return ast.Literal(token.text)
+        if tokens.peek().text != "=":
+            raise Exception(f"{tokens.peek().location}: expected an equal sign")
+        token = tokens.consume()
+        return Literal(token.text)
 
-    def parse_parenthesized_expression() -> ast.Expression:
-        consume("(")
+    def parse_parenthesized_expression() -> Expression:
+        tokens.consume("(")
         expr = parse_expression()
-        consume(")")
+        tokens.consume(")")
         return expr
 
-    def parse_if_expression() -> ast.Expression:
-        consume("if")
+    def parse_block_expression() -> Expression:
+        tokens.consume("{")
+
+        nested_expressions = []
+        result: Expression = Literal(None)
+
+        while tokens.peek().text != "}":
+            nested_expression = parse_expression()
+            nested_expressions.append(nested_expression)
+
+            if tokens.peek().text == ";":
+                tokens.consume(";")
+            elif tokens.peek().text == "}":
+                result = nested_expressions.pop()
+
+        tokens.consume("}")
+
+        return BlockExpression(nested_expressions, result)
+
+    def parse_if_expression() -> Expression:
+        tokens.consume("if")
         condition = parse_expression()
-        consume("then")
+        tokens.consume("then")
         then_clause = parse_expression()
-        if peek().text == "else":
-            consume("else")
+        if tokens.peek().text == "else":
+            tokens.consume("else")
             else_clause = parse_expression()
         else:
             else_clause = None
-        return ast.IfExpression(condition, then_clause, else_clause)
+        return IfExpression(condition, then_clause, else_clause)
 
-    def parse_function_call() -> ast.Expression:
-        function_name = peek().text
-        consume(function_name)
-        consume("(")
+    def parse_function_call() -> Expression:
+        function_name = tokens.peek().text
+        tokens.consume(function_name)
+        tokens.consume("(")
         arguments = []
-        while peek().text != ")":
+        while tokens.peek().text != ")":
             arguments.append(parse_expression())
-            if peek().text == ",":
-                consume(",")
-            elif peek().text == ")":
+            if tokens.peek().text == ",":
+                tokens.consume(",")
+            elif tokens.peek().text == ")":
                 break
             else:
-                raise Exception(f"{peek().location}: expected a comma")
-        consume(")")
+                raise Exception(f"{tokens.peek().location}: expected a comma")
+        tokens.consume(")")
 
-        return ast.FunctionExpression(function_name, arguments)
+        return FunctionExpression(function_name, arguments)
 
-    def parse_leaf_construct() -> ast.Expression:
-        if peek().text == "=":
+    def parse_leaf_construct() -> Expression:
+        if tokens.peek().text == "=":
             return parse_equal()
-        elif peek().text == "(":
+        elif tokens.peek().text == "(":
             return parse_parenthesized_expression()
-        elif peek().text == "if":
+        elif tokens.peek().text == "{":
+            return parse_block_expression()
+        elif tokens.peek().text == "if":
             return parse_if_expression()
-        elif peek().type == TokenType.INT_LITERAL:
+        elif tokens.peek().type == TokenType.INT_LITERAL:
             return parse_int_literal()
-        elif peek().type == TokenType.IDENTIFIER and next_token().text == "(":
+        elif (
+            tokens.peek().type == TokenType.IDENTIFIER
+            and tokens.next_token().text == "("
+        ):
             return parse_function_call()
-        elif peek().type == TokenType.IDENTIFIER:
+        elif tokens.peek().type == TokenType.IDENTIFIER:
             return parse_identifier()
         else:
             raise Exception(
-                f"{peek().location}: wrong token, got: {peek().type}: {peek().text}"
+                f"{tokens.peek().location}: wrong token, got: {tokens.peek().type}: {tokens.peek().text}"
             )
 
-    def parse_left_associative_binary_operators(level: int) -> ast.Expression:
+    def parse_left_associative_binary_operators(level: int) -> Expression:
         if level == len(left_associative_binary_operators):
             return parse_leaf_construct()
 
         left = parse_left_associative_binary_operators(level + 1)
-        while peek().text in left_associative_binary_operators[level]:
-            operator_token = consume()
+        while tokens.peek().text in left_associative_binary_operators[level]:
+            operator_token = tokens.consume()
             operator = operator_token.text
             right = parse_left_associative_binary_operators(level + 1)
-            left = ast.BinaryOp(left, operator, right)
+            left = BinaryOp(left, operator, right)
         return left
 
-    def parse_expression() -> ast.Expression:
+    def parse_expression() -> Expression:
         left = parse_left_associative_binary_operators(1)
 
         while True:
-            if peek().text in ["="]:  # right-associative
-                operator_token = consume()
+            if tokens.peek().text in ["="]:  # right-associative
+                operator_token = tokens.consume()
                 operator = operator_token.text
                 right = parse_expression()
-                left = ast.BinaryOp(left, operator, right)
-            elif peek().text in left_associative_binary_operators[0]:
-                operator_token = consume()
+                left = BinaryOp(left, operator, right)
+            elif tokens.peek().text in left_associative_binary_operators[0]:
+                operator_token = tokens.consume()
                 operator = operator_token.text
                 right = parse_left_associative_binary_operators(1)
-                left = ast.BinaryOp(left, operator, right)
+                left = BinaryOp(left, operator, right)
             else:
                 return left
 
-    if len(tokens) == 0:
+    if tokens.empty():
         return Literal(None)
 
     expression = parse_expression()
 
-    if peek().type != TokenType.END:
+    if tokens.peek().type != TokenType.END:
         raise EndOfInputException()
 
     return expression

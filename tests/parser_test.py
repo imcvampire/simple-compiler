@@ -1,8 +1,18 @@
+from typing import List, Tuple, Type
+
 import pytest
 
-from compiler.ast import Literal, BinaryOp, Expression, IfExpression, FunctionExpression
+from compiler.ast import (
+    Literal,
+    BinaryOp,
+    Expression,
+    IfExpression,
+    FunctionExpression,
+    BlockExpression,
+)
 from compiler.parser import parse
 from compiler.parser_exception import EndOfInputException
+from compiler.token import Tokens
 from compiler.tokenizer import tokenize
 
 
@@ -156,6 +166,60 @@ def cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            """{
+    f(a);
+    x = y;
+    f(x)
+}""",
+            BlockExpression(
+                expressions=[
+                    FunctionExpression(
+                        name="f",
+                        arguments=[Literal(value="a")],
+                    ),
+                    BinaryOp(
+                        left=Literal(value="x"),
+                        op="=",
+                        right=Literal(value="y"),
+                    ),
+                ],
+                result=FunctionExpression(
+                    name="f",
+                    arguments=[Literal(value="x")],
+                ),
+            ),
+        ),
+        (
+            """{
+    f(a);
+    x = y;
+    a != 1 and 2;
+}""",
+            BlockExpression(
+                expressions=[
+                    FunctionExpression(
+                        name="f",
+                        arguments=[Literal(value="a")],
+                    ),
+                    BinaryOp(
+                        left=Literal(value="x"),
+                        op="=",
+                        right=Literal(value="y"),
+                    ),
+                    BinaryOp(
+                        left=BinaryOp(
+                            left=Literal(value="a"),
+                            op="!=",
+                            right=Literal(value=1),
+                        ),
+                        op="and",
+                        right=Literal(value=2),
+                    ),
+                ],
+                result=Literal(None),
+            ),
+        ),
+        (
             "",
             Literal(None),
         ),
@@ -164,16 +228,18 @@ def cases() -> list[tuple[str, Expression]]:
 
 @pytest.mark.parametrize("test_input,expected", cases())
 def test_parser_parse(test_input: str, expected: Expression) -> None:
-    assert parse(tokenize(test_input)) == expected
+    assert parse(Tokens(tokens=tokenize(test_input))) == expected
 
 
-def error_cases() -> list[tuple[str, Exception]]:
+def error_cases() -> list[tuple[str, Type[Exception]]]:
     return [("a + b c", EndOfInputException)]
 
 
 @pytest.mark.parametrize("test_input,expected_exception", error_cases())
-def test_parser_parse_error(test_input, expected_exception: Exception) -> None:
+def test_parser_parse_error(
+    test_input: str, expected_exception: Type[Exception]
+) -> None:
     with pytest.raises(Exception) as e:
-        parse(tokenize(test_input))
+        parse(Tokens(tokens=tokenize(test_input)))
 
     assert e.type is expected_exception

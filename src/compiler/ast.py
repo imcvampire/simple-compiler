@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -34,3 +35,9 @@ class IfExpression(Expression):
 class FunctionExpression(Expression):
     name: str
     arguments: list[Expression]
+
+
+@dataclass
+class BlockExpression(Expression):
+    expressions: list[Expression]
+    result: Optional[Expression]

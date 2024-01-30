@@ -5,7 +5,7 @@ from compiler.token import Token, TokenType
 from compiler.tokenizer import tokenize
 
 
-def test_cases() -> list[tuple[str, list[Token]]]:
+def cases() -> list[tuple[str, list[Token]]]:
     return [
         (
             "if  3\nwhile",
@@ -62,6 +62,6 @@ comment. */""",
     ]
 
 
-@pytest.mark.parametrize("test_input,expected", test_cases())
+@pytest.mark.parametrize("test_input,expected", cases())
 def test_tokenizer_tokenize(test_input: str, expected: list[Token]) -> None:
     assert tokenize(test_input) == expected

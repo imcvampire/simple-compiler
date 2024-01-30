@@ -1,7 +1,7 @@
 import re
-from typing import Optional
+from typing import Optional, List
 
-from compiler.token import Token, TokenType
+from compiler.token import Token, TokenType, Tokens
 
 whitespace_re = re.compile(r"\s+")
 identifier_re = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
