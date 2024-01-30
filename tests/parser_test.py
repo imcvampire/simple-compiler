@@ -116,7 +116,7 @@ def cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
-          "a and b",
+            "a and b",
             BinaryOp(
                 left=Literal(value="a"),
                 op="and",
@@ -149,10 +149,10 @@ def cases() -> list[tuple[str, Expression]]:
                 left=BinaryOp(
                     left=Literal(value="a"),
                     op="!=",
-                    right=Literal(value="a"),
+                    right=Literal(value=1),
                 ),
                 op="and",
-                right=Literal(value="b"),
+                right=Literal(value=2),
             ),
         ),
         (
