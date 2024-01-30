@@ -1,3 +1,6 @@
+from contextlib import contextmanager
+from enum import Enum
+
 from compiler.ast import (
     Literal,
     BlockExpression,
@@ -7,7 +10,10 @@ from compiler.ast import (
     BinaryOp,
     VariableDeclarationExpression,
 )
-from compiler.parser_exception import EndOfInputException
+from compiler.parser_exception import (
+    EndOfInputException,
+    VariableCannotBeDeclaredException,
+)
 from compiler.token import Token, TokenType, Tokens
 
 left_associative_binary_operators = [
@@ -20,7 +26,25 @@ left_associative_binary_operators = [
 ]
 
 
+class Scope(Enum):
+    DIRECT = 0
+    LOCAL = 1
+
+
 def parse(tokens: Tokens) -> Expression:
+    current_scope = Scope.DIRECT
+
+    @contextmanager
+    def change_scope(new_scope: Scope) -> None:
+        nonlocal current_scope
+        prev_scope = current_scope
+
+        try:
+            current_scope = new_scope
+            yield
+        finally:
+            current_scope = prev_scope
+
     def parse_int_literal() -> Literal:
         if tokens.peek().type != TokenType.INT_LITERAL:
             raise Exception(f"{tokens.peek().location}: expected an integer literal")
@@ -34,10 +58,11 @@ def parse(tokens: Tokens) -> Expression:
         return Literal(token.text)
 
     def parse_parenthesized_expression() -> Expression:
-        tokens.consume("(")
-        expr = parse_expression()
-        tokens.consume(")")
-        return expr
+        with change_scope(Scope.LOCAL):
+            tokens.consume("(")
+            expr = parse_expression()
+            tokens.consume(")")
+            return expr
 
     def parse_block_expression() -> Expression:
         tokens.consume("{")
@@ -59,6 +84,11 @@ def parse(tokens: Tokens) -> Expression:
         return BlockExpression(nested_expressions, result)
 
     def parse_variable_declaration_expression() -> Expression:
+        if current_scope != Scope.DIRECT:
+            raise VariableCannotBeDeclaredException(
+                f"{tokens.peek().location}: variable declaration is not in local scope here"
+            )
+
         tokens.consume("var")
         name = tokens.consume().text
         tokens.comsume("=")
@@ -66,33 +96,35 @@ def parse(tokens: Tokens) -> Expression:
         return VariableDeclarationExpression(name, value)
 
     def parse_if_expression() -> Expression:
-        tokens.consume("if")
-        condition = parse_expression()
-        tokens.consume("then")
-        then_clause = parse_expression()
-        if tokens.peek().text == "else":
-            tokens.consume("else")
-            else_clause = parse_expression()
-        else:
-            else_clause = None
-        return IfExpression(condition, then_clause, else_clause)
+        with change_scope(Scope.LOCAL):
+            tokens.consume("if")
+            condition = parse_expression()
+            tokens.consume("then")
+            then_clause = parse_expression()
+            if tokens.peek().text == "else":
+                tokens.consume("else")
+                else_clause = parse_expression()
+            else:
+                else_clause = None
+            return IfExpression(condition, then_clause, else_clause)
 
     def parse_function_call() -> Expression:
-        function_name = tokens.peek().text
-        tokens.consume(function_name)
-        tokens.consume("(")
-        arguments = []
-        while tokens.peek().text != ")":
-            arguments.append(parse_expression())
-            if tokens.peek().text == ",":
-                tokens.consume(",")
-            elif tokens.peek().text == ")":
-                break
-            else:
-                raise Exception(f"{tokens.peek().location}: expected a comma")
-        tokens.consume(")")
+        with change_scope(Scope.LOCAL):
+            function_name = tokens.peek().text
+            tokens.consume(function_name)
+            tokens.consume("(")
+            arguments = []
+            while tokens.peek().text != ")":
+                arguments.append(parse_expression())
+                if tokens.peek().text == ",":
+                    tokens.consume(",")
+                elif tokens.peek().text == ")":
+                    break
+                else:
+                    raise Exception(f"{tokens.peek().location}: expected a comma")
+            tokens.consume(")")
 
-        return FunctionExpression(function_name, arguments)
+            return FunctionExpression(function_name, arguments)
 
     def parse_leaf_construct() -> Expression:
         if tokens.peek().text == "(":

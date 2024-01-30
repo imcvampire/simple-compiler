@@ -12,7 +12,10 @@ from compiler.ast import (
     VariableDeclarationExpression,
 )
 from compiler.parser import parse
-from compiler.parser_exception import EndOfInputException
+from compiler.parser_exception import (
+    EndOfInputException,
+    VariableCannotBeDeclaredException,
+)
 from compiler.token import Tokens
 from compiler.tokenizer import tokenize
 
@@ -277,7 +280,11 @@ def test_parser_parse(test_input: str, expected: Expression) -> None:
 
 
 def error_cases() -> list[tuple[str, Type[Exception]]]:
-    return [("a + b c", EndOfInputException)]
+    return [
+        ("a + b c", EndOfInputException),
+        ("(var a = 1)", VariableCannotBeDeclaredException),
+        ("if a then var a = 1", VariableCannotBeDeclaredException),
+    ]
 
 
 @pytest.mark.parametrize("test_input,expected_exception", error_cases())
