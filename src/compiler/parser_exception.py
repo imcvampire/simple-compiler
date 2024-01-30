@@ -4,3 +4,7 @@ class EndOfInputException(Exception):
 
 class VariableCannotBeDeclaredException(Exception):
     pass
+
+
+class MissingSemicolonException(Exception):
+    pass

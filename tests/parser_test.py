@@ -15,6 +15,7 @@ from compiler.parser import parse
 from compiler.parser_exception import (
     EndOfInputException,
     VariableCannotBeDeclaredException,
+    MissingSemicolonException,
 )
 from compiler.token import Tokens
 from compiler.tokenizer import tokenize
@@ -269,17 +270,97 @@ def cases() -> list[tuple[str, Expression]]:
             BlockExpression(
                 expressions=[
                     BlockExpression(
-                        expressions=[
-                        ],
-                        result=
-                        Literal(value="a"),
+                        expressions=[],
+                        result=Literal(value="a"),
                     ),
                 ],
-                result=
-                BlockExpression(
-                    expressions=[
-                    ],
+                result=BlockExpression(
+                    expressions=[],
                     result=Literal(value="b"),
+                ),
+            ),
+        ),
+        (
+            "{ if true then { a } b }",
+            BlockExpression(
+                expressions=[
+                    IfExpression(
+                        condition=Literal(value="true"),
+                        then_clause=BlockExpression(
+                            expressions=[],
+                            result=Literal(value="a"),
+                        ),
+                    ),
+                ],
+                result=Literal(value="b"),
+            ),
+        ),
+        (
+            "{ if true then { a }; b }",
+            BlockExpression(
+                expressions=[
+                    IfExpression(
+                        condition=Literal(value="true"),
+                        then_clause=BlockExpression(
+                            expressions=[],
+                            result=Literal(value="a"),
+                        ),
+                    ),
+                ],
+                result=Literal(value="b"),
+            ),
+        ),
+        (
+            "{ if true then { a } b; c }",
+            BlockExpression(
+                expressions=[
+                    IfExpression(
+                        condition=Literal(value="true"),
+                        then_clause=BlockExpression(
+                            expressions=[],
+                            result=Literal(value="a"),
+                        ),
+                    ),
+                    Literal(value="b"),
+                ],
+                result=Literal(value="c"),
+            ),
+        ),
+        (
+            "{ if true then { a } else { b } 3 }",
+            BlockExpression(
+                expressions=[
+                    IfExpression(
+                        condition=Literal(value="true"),
+                        then_clause=BlockExpression(
+                            expressions=[],
+                            result=Literal(value="a"),
+                        ),
+                        else_clause=BlockExpression(
+                            expressions=[],
+                            result=Literal(value="b"),
+                        ),
+                    ),
+                ],
+                result=Literal(value=3),
+            ),
+        ),
+        (
+            "x = { { f(a) } { b } }",
+            BinaryOp(
+                left=Literal(value="x"),
+                op="=",
+                right=BlockExpression(
+                    expressions=[
+                        BlockExpression(
+                            expressions=[],
+                            result=FunctionExpression(
+                                name="f",
+                                arguments=[Literal(value="a")],
+                            ),
+                        ),
+                    ],
+                    result=BlockExpression(expressions=[], result=Literal(value="b")),
                 ),
             ),
         ),
@@ -300,6 +381,8 @@ def error_cases() -> list[tuple[str, Type[Exception]]]:
         ("a + b c", EndOfInputException),
         ("(var a = 1)", VariableCannotBeDeclaredException),
         ("if a then var a = 1", VariableCannotBeDeclaredException),
+        ("{ a b }", MissingSemicolonException),
+        ("{ if true then { a } b c }", MissingSemicolonException),
     ]
 
 

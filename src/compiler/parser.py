@@ -14,6 +14,7 @@ from compiler.ast import (
 from compiler.parser_exception import (
     EndOfInputException,
     VariableCannotBeDeclaredException,
+    MissingSemicolonException,
 )
 from compiler.token import Token, TokenType, Tokens
 
@@ -70,15 +71,27 @@ def parse(tokens: Tokens) -> Expression:
 
         nested_expressions = []
         result: Expression = Literal(None)
+        has_result = False
 
         while tokens.peek().text != "}":
             nested_expression = parse_expression()
             nested_expressions.append(nested_expression)
 
-            if tokens.peek().text == ";":
-                tokens.consume(";")
-            elif tokens.peek().text == "}":
-                result = nested_expressions.pop()
+            if not isinstance(nested_expression, Literal):
+                if tokens.peek().text == ";":
+                    tokens.consume(";")
+                elif tokens.peek().text == "}":
+                    result = nested_expressions.pop()
+            else:
+                if tokens.peek().text == ";":
+                    tokens.consume(";")
+                elif not has_result:
+                    result = nested_expressions.pop()
+                    has_result = True
+                else:
+                    raise MissingSemicolonException(
+                        f"{tokens.peek().location}: expected a semicolon"
+                    )
 
         tokens.consume("}")
 
