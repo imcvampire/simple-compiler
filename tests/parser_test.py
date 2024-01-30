@@ -265,6 +265,25 @@ def cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            "{ { a } { b } }",
+            BlockExpression(
+                expressions=[
+                    BlockExpression(
+                        expressions=[
+                        ],
+                        result=
+                        Literal(value="a"),
+                    ),
+                ],
+                result=
+                BlockExpression(
+                    expressions=[
+                    ],
+                    result=Literal(value="b"),
+                ),
+            ),
+        ),
+        (
             "",
             Literal(None),
         ),
