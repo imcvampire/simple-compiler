@@ -41,3 +41,9 @@ class FunctionExpression(Expression):
 class BlockExpression(Expression):
     expressions: list[Expression]
     result: Optional[Expression]
+
+
+@dataclass
+class VariableDeclarationExpression(Expression):
+    name: str
+    value: Expression

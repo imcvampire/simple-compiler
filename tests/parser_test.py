@@ -9,6 +9,7 @@ from compiler.ast import (
     IfExpression,
     FunctionExpression,
     BlockExpression,
+    VariableDeclarationExpression,
 )
 from compiler.parser import parse
 from compiler.parser_exception import EndOfInputException
@@ -175,6 +176,38 @@ def cases() -> list[tuple[str, Expression]]:
                     op="=",
                     right=Literal(value=1),
                 ),
+            ),
+        ),
+        (
+            "var x = 123",
+            VariableDeclarationExpression(
+                name="x",
+                value=Literal(value=123),
+            ),
+        ),
+        (
+            "{var x = 123}",
+            BlockExpression(
+                expressions=[
+                    VariableDeclarationExpression(
+                        name="x",
+                        value=Literal(value=123),
+                    ),
+                ],
+                result=Literal(None),
+            ),
+        ),
+        (
+            "{var x = 123; x}",
+            BlockExpression(
+                expressions=[
+                    VariableDeclarationExpression(
+                        name="x",
+                        value=Literal(value=123),
+                    ),
+                    Literal(value="x"),
+                ],
+                result=Literal(value="x"),
             ),
         ),
         (

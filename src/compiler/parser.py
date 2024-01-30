@@ -5,6 +5,7 @@ from compiler.ast import (
     IfExpression,
     FunctionExpression,
     BinaryOp,
+    VariableDeclarationExpression,
 )
 from compiler.parser_exception import EndOfInputException
 from compiler.token import Token, TokenType, Tokens
@@ -57,6 +58,13 @@ def parse(tokens: Tokens) -> Expression:
 
         return BlockExpression(nested_expressions, result)
 
+    def parse_variable_declaration_expression() -> Expression:
+        tokens.consume("var")
+        name = tokens.consume().text
+        tokens.comsume("=")
+        value = parse_expression()
+        return VariableDeclarationExpression(name, value)
+
     def parse_if_expression() -> Expression:
         tokens.consume("if")
         condition = parse_expression()
@@ -91,6 +99,8 @@ def parse(tokens: Tokens) -> Expression:
             return parse_parenthesized_expression()
         elif tokens.peek().text == "{":
             return parse_block_expression()
+        elif tokens.peek().text == "var":
+            return parse_variable_declaration_expression()
         elif tokens.peek().text == "if":
             return parse_if_expression()
         elif tokens.peek().type == TokenType.INT_LITERAL:
