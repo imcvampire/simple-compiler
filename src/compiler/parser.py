@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from enum import Enum
+from typing import Iterator
 
 from compiler.ast import (
     Literal,
@@ -35,7 +36,7 @@ def parse(tokens: Tokens) -> Expression:
     current_scope = Scope.DIRECT
 
     @contextmanager
-    def scope(new_scope: Scope) -> None:
+    def scope(new_scope: Scope) -> Iterator[None]:
         nonlocal current_scope
         prev_scope = current_scope
 
@@ -91,7 +92,7 @@ def parse(tokens: Tokens) -> Expression:
 
         tokens.consume("var")
         name = tokens.consume().text
-        tokens.comsume("=")
+        tokens.consume("=")
         value = parse_expression()
         return VariableDeclarationExpression(name, value)
 

@@ -191,13 +191,11 @@ def cases() -> list[tuple[str, Expression]]:
         (
             "{var x = 123}",
             BlockExpression(
-                expressions=[
-                    VariableDeclarationExpression(
-                        name="x",
-                        value=Literal(value=123),
-                    ),
-                ],
-                result=Literal(None),
+                expressions=[],
+                result=VariableDeclarationExpression(
+                    name="x",
+                    value=Literal(value=123),
+                ),
             ),
         ),
         (
@@ -208,7 +206,6 @@ def cases() -> list[tuple[str, Expression]]:
                         name="x",
                         value=Literal(value=123),
                     ),
-                    Literal(value="x"),
                 ],
                 result=Literal(value="x"),
             ),
