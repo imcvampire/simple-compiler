@@ -39,8 +39,8 @@ class FunctionExpression(Expression):
 
 @dataclass
 class BlockExpression(Expression):
-    expressions: list[Expression]
-    result: Optional[Expression]
+    expressions: list[Expression] = field(default_factory=list)
+    result: Expression = field(default_factory=lambda: Literal(None))
 
 
 @dataclass
