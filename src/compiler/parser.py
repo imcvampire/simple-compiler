@@ -29,12 +29,12 @@ left_associative_binary_operators = [
 
 
 class Scope(Enum):
-    DIRECT = 0
+    TOP_LEVEL = 0
     LOCAL = 1
 
 
 def parse(tokens: Tokens) -> Expression:
-    current_scope = Scope.DIRECT
+    current_scope = Scope.TOP_LEVEL
 
     @contextmanager
     def scope(new_scope: Scope) -> Iterator[None]:
@@ -98,7 +98,7 @@ def parse(tokens: Tokens) -> Expression:
         return BlockExpression(nested_expressions, result)
 
     def parse_variable_declaration_expression() -> Expression:
-        if current_scope != Scope.DIRECT:
+        if current_scope != Scope.TOP_LEVEL:
             raise VariableCannotBeDeclaredException(
                 f"{tokens.peek().location}: variable declaration is not in local scope here"
             )
