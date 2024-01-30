@@ -34,7 +34,7 @@ class IfExpression(Expression):
 @dataclass
 class FunctionExpression(Expression):
     name: str
-    arguments: list[Expression]
+    arguments: list[Expression] = field(default_factory=list)
 
 
 @dataclass
