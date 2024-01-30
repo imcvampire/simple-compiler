@@ -16,7 +16,7 @@ def cases() -> list[tuple[str, Type]]:
         ("true", Bool),
         ("1 - 2", Int),
         ("1 == 2", Bool),
-        ("1 and 2", Bool),
+        ("true and false", Bool),
     ]
 
 
@@ -30,6 +30,7 @@ def error_cases() -> list[tuple[str, typing.Type[Exception]]]:
         ("1 - true", IncompatibleTypeException),
         ("1 == true", IncompatibleTypeException),
         ("1 and true", IncompatibleTypeException),
+        ("1 and 2", IncompatibleTypeException),
     ]
 
 

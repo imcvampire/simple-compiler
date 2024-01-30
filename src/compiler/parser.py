@@ -84,7 +84,12 @@ def parse(tokens: Tokens) -> Expression:
             nested_expression = parse_expression()
             nested_expressions.append(nested_expression)
 
-            if not isinstance(nested_expression, Literal):
+            if (
+                isinstance(nested_expression, BlockExpression)
+                or isinstance(nested_expression, FunctionExpression)
+                or isinstance(nested_expression, IfExpression)
+                or isinstance(nested_expression, VariableDeclarationExpression)
+            ):
                 if tokens.peek().text == ";":
                     tokens.consume(";")
                 elif tokens.peek().text == "}":
@@ -92,13 +97,14 @@ def parse(tokens: Tokens) -> Expression:
             else:
                 if tokens.peek().text == ";":
                     tokens.consume(";")
-                elif not has_result:
-                    result = nested_expressions.pop()
-                    has_result = True
                 else:
-                    raise MissingSemicolonException(
-                        f"{tokens.peek().location}: expected a semicolon"
-                    )
+                    result = nested_expressions.pop()
+                    break
+
+        if tokens.peek().text != "}":
+            raise MissingSemicolonException(
+                f"{tokens.peek().location}: expected a semicolon"
+            )
 
         tokens.consume("}")
 
