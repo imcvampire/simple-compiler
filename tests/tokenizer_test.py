@@ -41,6 +41,14 @@ def cases() -> list[tuple[str, list[Token]]]:
             ],
         ),
         (
+            "true != false",
+            [
+                Token(text="true", type=TokenType.BOOL_LITERAL),
+                Token(text="!=", type=TokenType.OPERATOR),
+                Token(text="false", type=TokenType.BOOL_LITERAL),
+            ],
+        ),
+        (
             """/* Another
 comment. */
 

@@ -7,6 +7,7 @@ whitespace_re = re.compile(r"\s+")
 identifier_re = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 operator_re = re.compile(r"(==?)|(!=)|(<=?)|(>=?)|\+|-|\*|/")
 int_literal_re = re.compile(r"\d+")
+bool_literal_re = re.compile(r"true|false")
 punctuation_re = re.compile(r"[(){},;]")
 comment_re = re.compile(r"#.*$|//.*$|/\*[\S\s]*?\*/", re.MULTILINE)
 
@@ -23,12 +24,14 @@ def tokenize(source_code: str) -> list[Token]:
             pass
         elif match := comment_re.match(source_code, i):
             result.append(Token(text=match.group(), type=TokenType.COMMENT))
+        elif match := bool_literal_re.match(source_code, i):
+            result.append(Token(text=match.group(), type=TokenType.BOOL_LITERAL))
+        elif match := int_literal_re.match(source_code, i):
+            result.append(Token(text=match.group(), type=TokenType.INT_LITERAL))
         elif match := identifier_re.match(source_code, i):
             result.append(Token(text=match.group(), type=TokenType.IDENTIFIER))
         elif match := operator_re.match(source_code, i):
             result.append(Token(text=match.group(), type=TokenType.OPERATOR))
-        elif match := int_literal_re.match(source_code, i):
-            result.append(Token(text=match.group(), type=TokenType.INT_LITERAL))
         elif match := punctuation_re.match(source_code, i):
             result.append(Token(text=match.group(), type=TokenType.PUNCTUATION))
         else:

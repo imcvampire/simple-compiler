@@ -9,7 +9,7 @@ class Expression:
 
 @dataclass
 class Literal(Expression):
-    value: str | int | bool | None
+    value: int | bool | None
 
 
 @dataclass

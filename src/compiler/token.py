@@ -9,9 +9,10 @@ class TokenType(Enum):
     END = 0
     IDENTIFIER = 1
     INT_LITERAL = 2
-    OPERATOR = 3
-    PUNCTUATION = 4
-    COMMENT = 5
+    BOOL_LITERAL = 3
+    OPERATOR = 4
+    PUNCTUATION = 5
+    COMMENT = 6
 
 
 @dataclass

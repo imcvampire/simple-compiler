@@ -10,6 +10,7 @@ from compiler.ast import (
     FunctionExpression,
     BlockExpression,
     VariableDeclarationExpression,
+    Identifier,
 )
 from compiler.parser import parse
 from compiler.parser_exception import (
@@ -24,11 +25,11 @@ from compiler.tokenizer import tokenize
 def cases() -> list[tuple[str, Expression]]:
     return [
         ("1 + 2", BinaryOp(left=Literal(value=1), op="+", right=Literal(value=2))),
-        ("a = 1", BinaryOp(left=Literal(value="a"), op="=", right=Literal(value=1))),
+        ("a = 1", BinaryOp(left=Identifier(name="a"), op="=", right=Literal(value=1))),
         (
             "a = 1 + 2",
             BinaryOp(
-                left=Literal(value="a"),
+                left=Identifier(name="a"),
                 op="=",
                 right=BinaryOp(left=Literal(value=1), op="+", right=Literal(value=2)),
             ),
@@ -36,7 +37,7 @@ def cases() -> list[tuple[str, Expression]]:
         (
             "a = 1 + 2 - 3",
             BinaryOp(
-                left=Literal(value="a"),
+                left=Identifier(name="a"),
                 op="=",
                 right=BinaryOp(
                     left=BinaryOp(
@@ -50,7 +51,7 @@ def cases() -> list[tuple[str, Expression]]:
         (
             "a = 1 * 2",
             BinaryOp(
-                left=Literal(value="a"),
+                left=Identifier(name="a"),
                 op="=",
                 right=BinaryOp(left=Literal(value=1), op="*", right=Literal(value=2)),
             ),
@@ -74,7 +75,7 @@ def cases() -> list[tuple[str, Expression]]:
         (
             "a = if 1 then 2",
             BinaryOp(
-                left=Literal(value="a"),
+                left=Identifier(name="a"),
                 op="=",
                 right=IfExpression(
                     condition=Literal(value=1),
@@ -85,7 +86,7 @@ def cases() -> list[tuple[str, Expression]]:
         (
             "a = if 1 then 3 else 4",
             BinaryOp(
-                left=Literal(value="a"),
+                left=Identifier(name="a"),
                 op="=",
                 right=IfExpression(
                     condition=Literal(value=1),
@@ -100,7 +101,7 @@ def cases() -> list[tuple[str, Expression]]:
                 left=Literal(value=1),
                 op="+",
                 right=IfExpression(
-                    condition=Literal(value="true"),
+                    condition=Literal(value=True),
                     then_clause=Literal(value=2),
                     else_clause=Literal(value=3),
                 ),
@@ -109,16 +110,16 @@ def cases() -> list[tuple[str, Expression]]:
         (
             "f(a, 1)",
             FunctionExpression(
-                name="f", arguments=[Literal(value="a"), Literal(value=1)]
+                name="f", arguments=[Identifier(name="a"), Literal(value=1)]
             ),
         ),
         (
             "a = f(b, 1)",
             BinaryOp(
-                left=Literal(value="a"),
+                left=Identifier(name="a"),
                 op="=",
                 right=FunctionExpression(
-                    name="f", arguments=[Literal(value="b"), Literal(value=1)]
+                    name="f", arguments=[Identifier(name="b"), Literal(value=1)]
                 ),
             ),
         ),
@@ -127,21 +128,21 @@ def cases() -> list[tuple[str, Expression]]:
             BinaryOp(
                 left=Literal(value=1),
                 op="or",
-                right=Literal(value="a"),
+                right=Identifier(name="a"),
             ),
         ),
         (
             "a and b",
             BinaryOp(
-                left=Literal(value="a"),
+                left=Identifier(name="a"),
                 op="and",
-                right=Literal(value="b"),
+                right=Identifier(name="b"),
             ),
         ),
         (
             "a == 1",
             BinaryOp(
-                left=Literal(value="a"),
+                left=Identifier(name="a"),
                 op="==",
                 right=Literal(value=1),
             ),
@@ -149,10 +150,10 @@ def cases() -> list[tuple[str, Expression]]:
         (
             "a and b != 1",
             BinaryOp(
-                left=Literal(value="a"),
+                left=Identifier(name="a"),
                 op="and",
                 right=BinaryOp(
-                    left=Literal(value="b"),
+                    left=Identifier(name="b"),
                     op="!=",
                     right=Literal(value=1),
                 ),
@@ -162,7 +163,7 @@ def cases() -> list[tuple[str, Expression]]:
             "a != 1 and 2",
             BinaryOp(
                 left=BinaryOp(
-                    left=Literal(value="a"),
+                    left=Identifier(name="a"),
                     op="!=",
                     right=Literal(value=1),
                 ),
@@ -173,10 +174,10 @@ def cases() -> list[tuple[str, Expression]]:
         (
             "a = b = 1",
             BinaryOp(
-                left=Literal(value="a"),
+                left=Identifier(name="a"),
                 op="=",
                 right=BinaryOp(
-                    left=Literal(value="b"),
+                    left=Identifier(name="b"),
                     op="=",
                     right=Literal(value=1),
                 ),
@@ -208,7 +209,7 @@ def cases() -> list[tuple[str, Expression]]:
                         value=Literal(value=123),
                     ),
                 ],
-                result=Literal(value="x"),
+                result=Identifier(name="x"),
             ),
         ),
         (
@@ -221,17 +222,17 @@ def cases() -> list[tuple[str, Expression]]:
                 expressions=[
                     FunctionExpression(
                         name="f",
-                        arguments=[Literal(value="a")],
+                        arguments=[Identifier(name="a")],
                     ),
                     BinaryOp(
-                        left=Literal(value="x"),
+                        left=Identifier(name="x"),
                         op="=",
-                        right=Literal(value="y"),
+                        right=Identifier(name="y"),
                     ),
                 ],
                 result=FunctionExpression(
                     name="f",
-                    arguments=[Literal(value="x")],
+                    arguments=[Identifier(name="x")],
                 ),
             ),
         ),
@@ -245,16 +246,16 @@ def cases() -> list[tuple[str, Expression]]:
                 expressions=[
                     FunctionExpression(
                         name="f",
-                        arguments=[Literal(value="a")],
+                        arguments=[Identifier(name="a")],
                     ),
                     BinaryOp(
-                        left=Literal(value="x"),
+                        left=Identifier(name="x"),
                         op="=",
-                        right=Literal(value="y"),
+                        right=Identifier(name="y"),
                     ),
                     BinaryOp(
                         left=BinaryOp(
-                            left=Literal(value="a"),
+                            left=Identifier(name="a"),
                             op="!=",
                             right=Literal(value=1),
                         ),
@@ -271,12 +272,12 @@ def cases() -> list[tuple[str, Expression]]:
                 expressions=[
                     BlockExpression(
                         expressions=[],
-                        result=Literal(value="a"),
+                        result=Identifier(name="a"),
                     ),
                 ],
                 result=BlockExpression(
                     expressions=[],
-                    result=Literal(value="b"),
+                    result=Identifier(name="b"),
                 ),
             ),
         ),
@@ -285,14 +286,14 @@ def cases() -> list[tuple[str, Expression]]:
             BlockExpression(
                 expressions=[
                     IfExpression(
-                        condition=Literal(value="true"),
+                        condition=Literal(value=True),
                         then_clause=BlockExpression(
                             expressions=[],
-                            result=Literal(value="a"),
+                            result=Identifier(name="a"),
                         ),
                     ),
                 ],
-                result=Literal(value="b"),
+                result=Identifier(name="b"),
             ),
         ),
         (
@@ -300,14 +301,14 @@ def cases() -> list[tuple[str, Expression]]:
             BlockExpression(
                 expressions=[
                     IfExpression(
-                        condition=Literal(value="true"),
+                        condition=Literal(value=True),
                         then_clause=BlockExpression(
                             expressions=[],
-                            result=Literal(value="a"),
+                            result=Identifier(name="a"),
                         ),
                     ),
                 ],
-                result=Literal(value="b"),
+                result=Identifier(name="b"),
             ),
         ),
         (
@@ -315,15 +316,15 @@ def cases() -> list[tuple[str, Expression]]:
             BlockExpression(
                 expressions=[
                     IfExpression(
-                        condition=Literal(value="true"),
+                        condition=Literal(value=True),
                         then_clause=BlockExpression(
                             expressions=[],
-                            result=Literal(value="a"),
+                            result=Identifier(name="a"),
                         ),
                     ),
-                    Literal(value="b"),
+                    Identifier(name="b"),
                 ],
-                result=Literal(value="c"),
+                result=Identifier(name="c"),
             ),
         ),
         (
@@ -331,14 +332,14 @@ def cases() -> list[tuple[str, Expression]]:
             BlockExpression(
                 expressions=[
                     IfExpression(
-                        condition=Literal(value="true"),
+                        condition=Literal(value=True),
                         then_clause=BlockExpression(
                             expressions=[],
-                            result=Literal(value="a"),
+                            result=Identifier(name="a"),
                         ),
                         else_clause=BlockExpression(
                             expressions=[],
-                            result=Literal(value="b"),
+                            result=Identifier(name="b"),
                         ),
                     ),
                 ],
@@ -348,7 +349,7 @@ def cases() -> list[tuple[str, Expression]]:
         (
             "x = { { f(a) } { b } }",
             BinaryOp(
-                left=Literal(value="x"),
+                left=Identifier(name="x"),
                 op="=",
                 right=BlockExpression(
                     expressions=[
@@ -356,11 +357,11 @@ def cases() -> list[tuple[str, Expression]]:
                             expressions=[],
                             result=FunctionExpression(
                                 name="f",
-                                arguments=[Literal(value="a")],
+                                arguments=[Identifier(name="a")],
                             ),
                         ),
                     ],
-                    result=BlockExpression(expressions=[], result=Literal(value="b")),
+                    result=BlockExpression(expressions=[], result=Identifier(name="b")),
                 ),
             ),
         ),

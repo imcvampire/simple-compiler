@@ -10,6 +10,7 @@ from compiler.ast import (
     FunctionExpression,
     BinaryOp,
     VariableDeclarationExpression,
+    Identifier,
 )
 from compiler.parser_exception import (
     EndOfInputException,
@@ -53,11 +54,17 @@ def parse(tokens: Tokens) -> Expression:
         token = tokens.consume()
         return Literal(int(token.text))
 
-    def parse_identifier() -> Literal:
+    def parse_bool_literal() -> Literal:
+        if tokens.peek().type != TokenType.BOOL_LITERAL:
+            raise Exception(f"{tokens.peek().location}: expected a bool literal")
+        token = tokens.consume()
+        return Literal(bool(token.text))
+
+    def parse_identifier() -> Identifier:
         if tokens.peek().type != TokenType.IDENTIFIER:
             raise Exception(f"{tokens.peek().location}: expected an identifier")
         token = tokens.consume()
-        return Literal(token.text)
+        return Identifier(token.text)
 
     def parse_parenthesized_expression() -> Expression:
         with scope(Scope.LOCAL):
@@ -151,6 +158,8 @@ def parse(tokens: Tokens) -> Expression:
             return parse_if_expression()
         elif tokens.peek().type == TokenType.INT_LITERAL:
             return parse_int_literal()
+        elif tokens.peek().type == TokenType.BOOL_LITERAL:
+            return parse_bool_literal()
         elif (
             tokens.peek().type == TokenType.IDENTIFIER
             and tokens.next_token().text == "("
