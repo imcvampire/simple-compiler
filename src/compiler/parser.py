@@ -12,6 +12,7 @@ left_associative_binary_operators = [
     ["*", "/"],
 ]
 
+
 # left_associative_binary_operators.reverse()
 
 
@@ -129,9 +130,7 @@ def parse(tokens: list[Token]) -> ast.Expression:
         return ast.FunctionExpression(function_name, arguments)
 
     def parse_leaf_construct() -> ast.Expression:
-        if peek().type == TokenType.END:
-            return Literal(None)
-        elif peek().text == "=":
+        if peek().text == "=":
             return parse_equal()
         elif peek().text == "(":
             return parse_parenthesized_expression()
@@ -176,6 +175,9 @@ def parse(tokens: list[Token]) -> ast.Expression:
                 left = ast.BinaryOp(left, operator, right)
             else:
                 return left
+
+    if len(tokens) == 0:
+        return Literal(None)
 
     expression = parse_expression()
 
