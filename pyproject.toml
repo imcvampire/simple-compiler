@@ -8,6 +8,7 @@ packages = [{include = "compiler", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
+coverage = "^7.4.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.1.0"
@@ -25,7 +26,6 @@ build-backend = "poetry.core.masonry.api"
 pythonpath = "src"
 addopts = [
     "--import-mode=importlib",
-    "--cov={envsitepackagesdir}/plugin_module --cov-report=html"
 ]
 
 

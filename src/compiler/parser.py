@@ -19,20 +19,6 @@ left_associative_binary_operators = [
 ]
 
 
-# left_associative_binary_operators.reverse()
-
-
-def get_left_associative_binary_operator_level(
-    operator: str, current_level: int = 0
-) -> int:
-    for level, operators in enumerate(
-        left_associative_binary_operators, start=current_level
-    ):
-        if operator in operators:
-            return level
-    return -1
-
-
 def parse(tokens: Tokens) -> Expression:
     def parse_int_literal() -> Literal:
         if tokens.peek().type != TokenType.INT_LITERAL:
@@ -43,12 +29,6 @@ def parse(tokens: Tokens) -> Expression:
     def parse_identifier() -> Literal:
         if tokens.peek().type != TokenType.IDENTIFIER:
             raise Exception(f"{tokens.peek().location}: expected an identifier")
-        token = tokens.consume()
-        return Literal(token.text)
-
-    def parse_equal() -> Literal:
-        if tokens.peek().text != "=":
-            raise Exception(f"{tokens.peek().location}: expected an equal sign")
         token = tokens.consume()
         return Literal(token.text)
 
@@ -107,9 +87,7 @@ def parse(tokens: Tokens) -> Expression:
         return FunctionExpression(function_name, arguments)
 
     def parse_leaf_construct() -> Expression:
-        if tokens.peek().text == "=":
-            return parse_equal()
-        elif tokens.peek().text == "(":
+        if tokens.peek().text == "(":
             return parse_parenthesized_expression()
         elif tokens.peek().text == "{":
             return parse_block_expression()

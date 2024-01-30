@@ -166,6 +166,18 @@ def cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            "a = b = 1",
+            BinaryOp(
+                left=Literal(value="a"),
+                op="=",
+                right=BinaryOp(
+                    left=Literal(value="b"),
+                    op="=",
+                    right=Literal(value=1),
+                ),
+            ),
+        ),
+        (
             """{
     f(a);
     x = y;
