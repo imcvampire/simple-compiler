@@ -25,7 +25,9 @@ build-backend = "poetry.core.masonry.api"
 pythonpath = "src"
 addopts = [
     "--import-mode=importlib",
+    "--cov={envsitepackagesdir}/plugin_module --cov-report=html"
 ]
+
 
 [virtualenvs]
 prefer-active-python = true
