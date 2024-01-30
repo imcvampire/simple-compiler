@@ -35,7 +35,7 @@ def parse(tokens: Tokens) -> Expression:
     current_scope = Scope.DIRECT
 
     @contextmanager
-    def change_scope(new_scope: Scope) -> None:
+    def scope(new_scope: Scope) -> None:
         nonlocal current_scope
         prev_scope = current_scope
 
@@ -58,7 +58,7 @@ def parse(tokens: Tokens) -> Expression:
         return Literal(token.text)
 
     def parse_parenthesized_expression() -> Expression:
-        with change_scope(Scope.LOCAL):
+        with scope(Scope.LOCAL):
             tokens.consume("(")
             expr = parse_expression()
             tokens.consume(")")
@@ -96,7 +96,7 @@ def parse(tokens: Tokens) -> Expression:
         return VariableDeclarationExpression(name, value)
 
     def parse_if_expression() -> Expression:
-        with change_scope(Scope.LOCAL):
+        with scope(Scope.LOCAL):
             tokens.consume("if")
             condition = parse_expression()
             tokens.consume("then")
@@ -109,7 +109,7 @@ def parse(tokens: Tokens) -> Expression:
             return IfExpression(condition, then_clause, else_clause)
 
     def parse_function_call() -> Expression:
-        with change_scope(Scope.LOCAL):
+        with scope(Scope.LOCAL):
             function_name = tokens.peek().text
             tokens.consume(function_name)
             tokens.consume("(")
