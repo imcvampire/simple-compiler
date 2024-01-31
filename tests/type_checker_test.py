@@ -5,7 +5,7 @@ import pytest
 from compiler.parser import parse
 from compiler.token import Tokens
 from compiler.tokenizer import tokenize
-from compiler.type import Int, Bool, Type
+from compiler.type import Int, Bool, Type, Unit
 from compiler.type_checker import typecheck
 from compiler.type_checker_exception import IncompatibleTypeException
 
@@ -17,6 +17,9 @@ def cases() -> list[tuple[str, Type]]:
         ("1 - 2", Int),
         ("1 == 2", Bool),
         ("true and false", Bool),
+        ("if 1 < 2 then 3", Unit),
+        ("if 1 < 2 then 3 else 4", Int),
+        ("if 1 < 2 then 3 < 4 else 4 < 5", Bool),
     ]
 
 
@@ -31,6 +34,9 @@ def error_cases() -> list[tuple[str, typing.Type[Exception]]]:
         ("1 == true", IncompatibleTypeException),
         ("1 and true", IncompatibleTypeException),
         ("1 and 2", IncompatibleTypeException),
+        ("(1 < 2) + 3", IncompatibleTypeException),
+        ("if 1 then 2 else 3", IncompatibleTypeException),
+        ("if 1 < 2 then 3 else 3 < 5", IncompatibleTypeException)
     ]
 
 
