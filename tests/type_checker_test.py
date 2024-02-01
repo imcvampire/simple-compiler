@@ -25,6 +25,8 @@ def cases() -> list[tuple[str, Type]]:
         ("var a = 1", Int),
         ("var a = 0; \n a = 1", Int),
         ("var a = 0; \n a = 1;", Unit),
+        ("{var a = 0; \n a = 1}", Int),
+        ("{var a = 0; \n a = 1;}", Unit),
     ]
 
 
