@@ -205,7 +205,11 @@ def parse(tokens: Tokens) -> Expression:
                 right = parse_left_associative_binary_operators(1)
                 left = BinaryOp(left, operator, right)
             elif current_scope is Scope.TOP_LEVEL and tokens.peek().text == ";":
-                consume = tokens.consume(";")
+                tokens.consume(";")
+
+                if tokens.peek().type == TokenType.END:
+                    return left
+
                 left = BlockExpression([left, parse_expression()], Literal(None))
             else:
                 return left

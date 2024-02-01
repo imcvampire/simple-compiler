@@ -382,6 +382,22 @@ def cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            "var a = 0; \n a = 1;",
+            BlockExpression(
+                expressions=[
+                    VariableDeclarationExpression(
+                        name="a",
+                        value=Literal(value=0),
+                    ),
+                    BinaryOp(
+                        left=Identifier(name="a"),
+                        op="=",
+                        right=Literal(value=1),
+                    ),
+                ],
+            ),
+        ),
+        (
             "",
             Literal(None),
         ),
