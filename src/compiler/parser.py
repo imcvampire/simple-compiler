@@ -17,7 +17,7 @@ from compiler.parser_exception import (
     VariableCannotBeDeclaredException,
     MissingSemicolonException,
 )
-from compiler.token import Token, TokenType, Tokens
+from compiler.token import TokenType, Tokens
 
 left_associative_binary_operators = [
     ["or"],
@@ -31,7 +31,8 @@ left_associative_binary_operators = [
 
 class Scope(Enum):
     TOP_LEVEL = 0
-    LOCAL = 1
+    BLOCK = 1
+    LOCAL = 2
 
 
 def parse(tokens: Tokens) -> Expression:
@@ -78,28 +79,27 @@ def parse(tokens: Tokens) -> Expression:
 
         nested_expressions = []
         result: Expression = Literal(None)
-        has_result = False
 
-        while tokens.peek().text != "}":
-            nested_expression = parse_expression()
-            nested_expressions.append(nested_expression)
+        with scope(Scope.BLOCK):
+            while tokens.peek().text != "}":
+                nested_expression = parse_expression()
+                nested_expressions.append(nested_expression)
 
-            if (
-                isinstance(nested_expression, BlockExpression)
-                or isinstance(nested_expression, FunctionExpression)
-                or isinstance(nested_expression, IfExpression)
-                or isinstance(nested_expression, VariableDeclarationExpression)
-            ):
-                if tokens.peek().text == ";":
-                    tokens.consume(";")
-                elif tokens.peek().text == "}":
-                    result = nested_expressions.pop()
-            else:
-                if tokens.peek().text == ";":
-                    tokens.consume(";")
+                if (
+                    isinstance(nested_expression, BlockExpression)
+                    or isinstance(nested_expression, FunctionExpression)
+                    or isinstance(nested_expression, IfExpression)
+                ):
+                    if tokens.peek().text == ";":
+                        tokens.consume(";")
+                    elif tokens.peek().text == "}":
+                        result = nested_expressions.pop()
                 else:
-                    result = nested_expressions.pop()
-                    break
+                    if tokens.peek().text == ";":
+                        tokens.consume(";")
+                    else:
+                        result = nested_expressions.pop()
+                        break
 
         if tokens.peek().text != "}":
             raise MissingSemicolonException(
@@ -111,7 +111,7 @@ def parse(tokens: Tokens) -> Expression:
         return BlockExpression(nested_expressions, result)
 
     def parse_variable_declaration_expression() -> Expression:
-        if current_scope != Scope.TOP_LEVEL:
+        if current_scope not in [Scope.TOP_LEVEL, Scope.BLOCK]:
             raise VariableCannotBeDeclaredException(
                 f"{tokens.peek().location}: variable declaration is not in local scope here"
             )
@@ -119,7 +119,7 @@ def parse(tokens: Tokens) -> Expression:
         tokens.consume("var")
         name = tokens.consume().text
         tokens.consume("=")
-        value = parse_expression()
+        value = parse_leaf_construct()
         return VariableDeclarationExpression(name, value)
 
     def parse_if_expression() -> Expression:
@@ -204,6 +204,9 @@ def parse(tokens: Tokens) -> Expression:
                 operator = operator_token.text
                 right = parse_left_associative_binary_operators(1)
                 left = BinaryOp(left, operator, right)
+            elif current_scope is Scope.TOP_LEVEL and tokens.peek().text == ";":
+                consume = tokens.consume(";")
+                left = BlockExpression([left, parse_expression()], Literal(None))
             else:
                 return left
 
@@ -211,6 +214,16 @@ def parse(tokens: Tokens) -> Expression:
         return Literal(None)
 
     expression = parse_expression()
+
+    if (
+        current_scope is Scope.TOP_LEVEL
+        and isinstance(expression, BlockExpression)
+        and (
+            tokens.prev_token().text not in [";", "}"]
+            and len(expression.expressions) > 0
+        )
+    ):
+        expression.result = expression.expressions.pop()
 
     if tokens.peek().type != TokenType.END:
         raise EndOfInputException()

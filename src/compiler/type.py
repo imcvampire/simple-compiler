@@ -14,4 +14,4 @@ class PrimitiveType(Type):
 Int = PrimitiveType("Int")
 Bool = PrimitiveType("Bool")
 Unit = PrimitiveType("Unit")
-Function = PrimitiveType("Function")
+Func = PrimitiveType("Function")

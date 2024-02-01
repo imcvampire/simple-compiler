@@ -1,4 +1,4 @@
-from typing import List, Tuple, Type
+from typing import Type
 
 import pytest
 
@@ -362,6 +362,22 @@ def cases() -> list[tuple[str, Expression]]:
                         ),
                     ],
                     result=BlockExpression(expressions=[], result=Identifier(name="b")),
+                ),
+            ),
+        ),
+        (
+            "var a = 0; \n a = 1",
+            BlockExpression(
+                expressions=[
+                    VariableDeclarationExpression(
+                        name="a",
+                        value=Literal(value=0),
+                    ),
+                ],
+                result=BinaryOp(
+                    left=Identifier(name="a"),
+                    op="=",
+                    right=Literal(value=1),
                 ),
             ),
         ),

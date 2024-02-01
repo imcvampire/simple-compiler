@@ -1,8 +1,8 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Optional
 
 from compiler.location import Location
-from enum import Enum
 
 
 class TokenType(Enum):
@@ -34,6 +34,11 @@ class Tokens:
         next_pos = self.pos + 1
 
         return self._get(next_pos)
+
+    def prev_token(self) -> Token:
+        prev_pos = self.pos - 1
+
+        return self._get(prev_pos)
 
     def consume(self, expected: str | list[str] | None = None) -> Token:
         token = self.peek()

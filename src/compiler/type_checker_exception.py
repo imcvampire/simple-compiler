@@ -4,3 +4,7 @@ class UnknownTypeException(Exception):
 
 class IncompatibleTypeException(Exception):
     pass
+
+
+class UnknownOperator(Exception):
+    pass

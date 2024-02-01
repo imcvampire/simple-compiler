@@ -20,6 +20,10 @@ def cases() -> list[tuple[str, Type]]:
         ("if 1 < 2 then 3", Unit),
         ("if 1 < 2 then 3 else 4", Int),
         ("if 1 < 2 then 3 < 4 else 4 < 5", Bool),
+        ("print_int(1)", Unit),
+        ("print_bool(true)", Unit),
+        ("var a = 1", Int),
+        ("var a = 0; \n a = 1", Int),
     ]
 
 
@@ -36,7 +40,10 @@ def error_cases() -> list[tuple[str, typing.Type[Exception]]]:
         ("1 and 2", IncompatibleTypeException),
         ("(1 < 2) + 3", IncompatibleTypeException),
         ("if 1 then 2 else 3", IncompatibleTypeException),
-        ("if 1 < 2 then 3 else 3 < 5", IncompatibleTypeException)
+        ("if 1 < 2 then 3 else 3 < 5", IncompatibleTypeException),
+        ("print_int(true)", IncompatibleTypeException),
+        ("print_bool(1)", IncompatibleTypeException),
+        ("var a = 1; \n a = true", IncompatibleTypeException),
     ]
 
 
