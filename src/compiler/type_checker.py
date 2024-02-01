@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Callable
 
 from compiler.ast import (
     Expression,
@@ -19,24 +19,25 @@ from compiler.type_checker_exception import (
 
 
 def create_typecheck(
-    types: list[Type], expected_types: list[Type], return_type: Type = None
-):
-    for i, t in enumerate(types):
-        if t is not expected_types[i]:
-            raise IncompatibleTypeException(
-                f"Incompatible types. Expect {expected_types}, got: {types}"
-            )
+    expected_types: list[Type], return_type: Optional[Type] = None
+) -> Callable[[list[Type]], Type]:
+    def _(types: list[Type]) -> Type:
+        for i, t in enumerate(types):
+            if t is not expected_types[i]:
+                raise IncompatibleTypeException(
+                    f"Incompatible types. Expect {expected_types}, got: {types}"
+                )
 
-    return return_type if return_type is not None else expected_types[0]
+        return return_type if return_type is not None else expected_types[0]
+
+    return _
 
 
 def create_typecheck_binary_operator(
-    operators: list[str], expected_type: Type, return_type: Type = None
-):
-    def _(operator: str, types: list[Type]) -> Type:
-        if operator in operators:
-            return create_typecheck(types, [expected_type, expected_type], return_type)
-        raise UnknownOperator(f"Unknown operator: {operator}")
+    operators: list[str], expected_type: Type, return_type: Optional[Type] = None
+) -> Callable[[list[Type]], Type]:
+    def _(types: list[Type]) -> Type:
+        return create_typecheck([expected_type, expected_type], return_type)(types)
 
     return _
 
@@ -50,20 +51,20 @@ def typecheck_equal_operator(types: tuple[Type, Type]) -> Type:
     )
 
 
-operator_types = [
+operator_types: list[tuple[list[str], Callable[[list[Type]], Type]]] = [
     (["+", "-", "*", "/"], create_typecheck_binary_operator(["+", "-", "*", "/"], Int)),
     (
         ["<", ">", "<=", ">=", "==", "!="],
         create_typecheck_binary_operator(["<", ">", "<=", ">=", "==", "!="], Int, Bool),
     ),
     (["and", "or"], create_typecheck_binary_operator(["and", "or"], Bool, Bool)),
-    ("print_int", create_typecheck([Int], [Int])),
-    ("print_bool", create_typecheck([Bool], [Bool])),
+    (["print_int"], create_typecheck([Int], Unit)),
+    (["print_bool"], create_typecheck([Bool], Unit)),
 ]
 
 
 def typecheck(node: Expression) -> Type:
-    identifier_types: Optional[dict[tuple[str, Type]]] = None
+    identifier_types: Optional[dict[str, Type]] = None
 
     def _typecheck(_node: Expression) -> Type:
         nonlocal identifier_types
@@ -88,15 +89,14 @@ def typecheck(node: Expression) -> Type:
                 else:
                     for operator, func in operator_types:
                         if _node.op in operator:
-                            return func(_node.op, [t1, t2])
+                            return func([t1, t2])
 
                 raise UnknownOperator(f"Unknown operator: {_node.op}")
             case FunctionExpression():
                 types = [_typecheck(arg) for arg in _node.arguments]
-                if _node.name == "print_int":
-                    return create_typecheck(types, [Int], Unit)
-                elif _node.name == "print_bool":
-                    return create_typecheck(types, [Bool], Unit)
+                for operator, func in operator_types:
+                    if _node.name in operator:
+                        return func(types)
                 else:
                     # TODO: implement
                     return Unit
@@ -124,8 +124,12 @@ def typecheck(node: Expression) -> Type:
                 identifier_types[_node.name] = _typecheck(_node.value)
                 return identifier_types[_node.name]
             case Identifier():
+                if identifier_types is None:
+                    raise Exception(f"Identifier map is not defined")
+
                 if _node.name not in identifier_types.keys():
                     raise UnknownTypeException(f"Unknown identifier: {_node.name}")
+
                 return identifier_types[_node.name]
             case BlockExpression():
                 for expression in _node.expressions:
