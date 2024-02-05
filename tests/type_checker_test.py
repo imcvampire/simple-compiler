@@ -7,7 +7,10 @@ from compiler.token import Tokens
 from compiler.tokenizer import tokenize
 from compiler.type import Int, Bool, Type, Unit
 from compiler.type_checker import typecheck
-from compiler.type_checker_exception import IncompatibleTypeException
+from compiler.type_checker_exception import (
+    IncompatibleTypeException,
+    UnknownTypeException,
+)
 
 
 def cases() -> list[tuple[str, Type]]:
@@ -47,6 +50,8 @@ def error_cases() -> list[tuple[str, typing.Type[Exception]]]:
         ("print_int(true)", IncompatibleTypeException),
         ("print_bool(1)", IncompatibleTypeException),
         ("var a = 1; \n a = true", IncompatibleTypeException),
+        ("a = 1", UnknownTypeException),
+        ("var a = 1; \n b = true", UnknownTypeException),
     ]
 
 

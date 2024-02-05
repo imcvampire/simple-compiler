@@ -122,7 +122,7 @@ def typecheck(
             return identifier_types[node.name]
         case Identifier():
             if identifier_types is None:
-                raise Exception(f"Identifier map is not defined")
+                raise UnknownTypeException(f"Unknown identifier: {node.name}")
 
             if node.name not in identifier_types.keys():
                 raise UnknownTypeException(f"Unknown identifier: {node.name}")
