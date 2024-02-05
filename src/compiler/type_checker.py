@@ -63,79 +63,79 @@ operator_types: list[tuple[list[str], Callable[[list[Type]], Type]]] = [
 ]
 
 
-def typecheck(node: Expression) -> Type:
-    identifier_types: Optional[dict[str, Type]] = None
+def typecheck(
+    node: Expression, identifier_types: Optional[dict[str, Type]] = None
+) -> Type:
+    match node:
+        case Literal():
+            match node.value:
+                case bool():
+                    return Bool
+                case int():
+                    return Int
+                case None:
+                    return Unit
+                case _:
+                    raise UnknownTypeException(f"Unknown type: {node.value}")
+        case BinaryOp():
+            t1 = typecheck(node.left, identifier_types)
+            t2 = typecheck(node.right, identifier_types)
 
-    def _typecheck(_node: Expression) -> Type:
-        nonlocal identifier_types
-
-        match _node:
-            case Literal():
-                match _node.value:
-                    case bool():
-                        return Bool
-                    case int():
-                        return Int
-                    case None:
-                        return Unit
-                    case _:
-                        raise UnknownTypeException(f"Unknown type: {_node.value}")
-            case BinaryOp():
-                t1 = _typecheck(_node.left)
-                t2 = _typecheck(_node.right)
-
-                if _node.op == "=":
-                    return typecheck_equal_operator((t1, t2))
-                else:
-                    for operator, func in operator_types:
-                        if _node.op in operator:
-                            return func([t1, t2])
-
-                raise UnknownOperator(f"Unknown operator: {_node.op}")
-            case FunctionExpression():
-                types = [_typecheck(arg) for arg in _node.arguments]
+            if node.op == "=":
+                return typecheck_equal_operator((t1, t2))
+            else:
                 for operator, func in operator_types:
-                    if _node.name in operator:
-                        return func(types)
-                else:
-                    # TODO: implement
-                    return Unit
-                    # return create_typecheck(types, [Int, Bool], Func)
-            case IfExpression():
-                t1 = _typecheck(_node.condition)
-                if t1 is not Bool:
+                    if node.op in operator:
+                        return func([t1, t2])
+
+            raise UnknownOperator(f"Unknown operator: {node.op}")
+        case FunctionExpression():
+            types = [typecheck(arg, identifier_types) for arg in node.arguments]
+            for operator, func in operator_types:
+                if node.name in operator:
+                    return func(types)
+            else:
+                # TODO: implement
+                return Unit
+                # return create_typecheck(types, [Int, Bool], Func)
+        case IfExpression():
+            t1 = typecheck(node.condition, identifier_types)
+            if t1 is not Bool:
+                raise IncompatibleTypeException(
+                    f"Incompatible types. Expect Bool, got: {t1}"
+                )
+            t2 = typecheck(node.then_clause, identifier_types)
+            if node.else_clause is None:
+                return Unit
+            else:
+                t3 = typecheck(node.else_clause, identifier_types)
+                if t2 is not t3:
                     raise IncompatibleTypeException(
-                        f"Incompatible types. Expect Bool, got: {t1}"
+                        f"Incompatible types. Got {t2} and {t3}"
                     )
-                t2 = _typecheck(_node.then_clause)
-                if _node.else_clause is None:
-                    return Unit
-                else:
-                    t3 = _typecheck(_node.else_clause)
-                    if t2 is not t3:
-                        raise IncompatibleTypeException(
-                            f"Incompatible types. Got {t2} and {t3}"
-                        )
-                return t2
-            case VariableDeclarationExpression():
-                if identifier_types is None:
-                    identifier_types = {}
+            return t2
+        case VariableDeclarationExpression():
+            if identifier_types is None:
+                identifier_types = {}
 
-                identifier_types[_node.name] = _typecheck(_node.value)
-                return identifier_types[_node.name]
-            case Identifier():
-                if identifier_types is None:
-                    raise Exception(f"Identifier map is not defined")
+            identifier_types[node.name] = typecheck(node.value, identifier_types)
+            return identifier_types[node.name]
+        case Identifier():
+            if identifier_types is None:
+                raise Exception(f"Identifier map is not defined")
 
-                if _node.name not in identifier_types.keys():
-                    raise UnknownTypeException(f"Unknown identifier: {_node.name}")
+            if node.name not in identifier_types.keys():
+                raise UnknownTypeException(f"Unknown identifier: {node.name}")
 
-                return identifier_types[_node.name]
-            case BlockExpression():
-                for expression in _node.expressions:
-                    _typecheck(expression)
-                return _typecheck(_node.result)
+            return identifier_types[node.name]
+        case BlockExpression():
+            _identifier_types = identifier_types
+            if identifier_types is None:
+                _identifier_types = {}
 
-        raise UnknownTypeException(f"Unknown type: {_node}")
+            for expression in node.expressions:
+                typecheck(expression, _identifier_types)
 
-    return _typecheck(node)
+            return typecheck(node.result, _identifier_types)
+
+    raise UnknownTypeException(f"Unknown type: {node}")
