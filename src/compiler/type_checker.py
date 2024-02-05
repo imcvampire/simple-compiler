@@ -121,11 +121,11 @@ def typecheck(
             identifier_types[node.name] = typecheck(node.value, identifier_types)
 
             if node.type is not None:
-                if node.type not in ["Int", "Bool"]:
+                if node.type.type not in ["Int", "Bool"]:
                     raise UnknownTypeException(f"Unknown type: {node.type}")
-                elif identifier_types[node.name] != PrimitiveType(node.type):
+                elif identifier_types[node.name] != PrimitiveType(node.type.type):
                     raise IncompatibleTypeException(
-                        f"Incompatible types. Expect {PrimitiveType(node.type)}, got: {identifier_types[node.name]}"
+                        f"Incompatible types. Expect {PrimitiveType(node.type.type)}, got: {identifier_types[node.name]}"
                     )
 
             return identifier_types[node.name]

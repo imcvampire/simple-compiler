@@ -11,6 +11,7 @@ from compiler.ast import (
     BlockExpression,
     VariableDeclarationExpression,
     Identifier,
+    TypeExpression,
 )
 from compiler.parser import parse
 from compiler.parser_exception import (
@@ -403,7 +404,7 @@ def cases() -> list[tuple[str, Expression]]:
             VariableDeclarationExpression(
                 name="a",
                 value=Literal(value=1),
-                type="Int",
+                type=TypeExpression("Int"),
             ),
         ),
         (
