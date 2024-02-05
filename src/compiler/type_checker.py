@@ -10,7 +10,7 @@ from compiler.ast import (
     Identifier,
     BlockExpression,
 )
-from compiler.type import Int, Type, Bool, Unit
+from compiler.type import Int, Type, Bool, Unit, PrimitiveType
 from compiler.type_checker_exception import (
     UnknownTypeException,
     IncompatibleTypeException,
@@ -119,6 +119,15 @@ def typecheck(
                 identifier_types = {}
 
             identifier_types[node.name] = typecheck(node.value, identifier_types)
+
+            if node.type is not None:
+                if node.type not in ["Int", "Bool"]:
+                    raise UnknownTypeException(f"Unknown type: {node.type}")
+                elif identifier_types[node.name] != PrimitiveType(node.type):
+                    raise IncompatibleTypeException(
+                        f"Incompatible types. Expect {PrimitiveType(node.type)}, got: {identifier_types[node.name]}"
+                    )
+
             return identifier_types[node.name]
         case Identifier():
             if identifier_types is None:

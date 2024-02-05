@@ -8,3 +8,11 @@ class VariableCannotBeDeclaredException(Exception):
 
 class MissingSemicolonException(Exception):
     pass
+
+
+class MissingTypeException(Exception):
+    pass
+
+
+class UnknownTypeException(Exception):
+    pass

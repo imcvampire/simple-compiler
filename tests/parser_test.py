@@ -17,6 +17,7 @@ from compiler.parser_exception import (
     EndOfInputException,
     VariableCannotBeDeclaredException,
     MissingSemicolonException,
+    MissingTypeException,
 )
 from compiler.token import Tokens
 from compiler.tokenizer import tokenize
@@ -398,6 +399,14 @@ def cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            "var a: Int = 1",
+            VariableDeclarationExpression(
+                name="a",
+                value=Literal(value=1),
+                type="Int",
+            ),
+        ),
+        (
             "",
             Literal(None),
         ),
@@ -416,6 +425,7 @@ def error_cases() -> list[tuple[str, Type[Exception]]]:
         ("if a then var a = 1", VariableCannotBeDeclaredException),
         ("{ a b }", MissingSemicolonException),
         ("{ if true then { a } b c }", MissingSemicolonException),
+        ("var a: Foo = 1", MissingTypeException),
     ]
 
 

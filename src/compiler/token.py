@@ -13,6 +13,7 @@ class TokenType(Enum):
     OPERATOR = 4
     PUNCTUATION = 5
     COMMENT = 6
+    TYPE = 7
 
 
 @dataclass

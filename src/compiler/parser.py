@@ -16,6 +16,8 @@ from compiler.parser_exception import (
     EndOfInputException,
     VariableCannotBeDeclaredException,
     MissingSemicolonException,
+    MissingTypeException,
+    UnknownTypeException,
 )
 from compiler.token import TokenType, Tokens
 
@@ -118,9 +120,19 @@ def parse(tokens: Tokens) -> Expression:
 
         tokens.consume("var")
         name = tokens.consume().text
+        var_type = None
+        if tokens.peek().text == ":":
+            tokens.consume(":")
+
+            if tokens.peek().type != TokenType.TYPE:
+                raise MissingTypeException(f"{tokens.peek().location}: expected a type")
+            elif tokens.peek().text not in ["Int", "Bool"]:
+                raise UnknownTypeException(f"{tokens.peek().location}: unknown type")
+
+            var_type = tokens.consume().text
         tokens.consume("=")
         value = parse_leaf_construct()
-        return VariableDeclarationExpression(name, value)
+        return VariableDeclarationExpression(name, value, var_type)
 
     def parse_if_expression() -> Expression:
         with scope(Scope.LOCAL):

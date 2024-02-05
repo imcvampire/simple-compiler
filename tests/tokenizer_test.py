@@ -1,6 +1,5 @@
 import pytest
 
-from compiler.ast import Literal, BinaryOp
 from compiler.token import Token, TokenType
 from compiler.tokenizer import tokenize
 
@@ -65,6 +64,17 @@ comment. */""",
                 Token(text="# dfgdfgreter", type=TokenType.COMMENT),
                 Token(text="2", type=TokenType.INT_LITERAL),
                 Token(text="// dfgfdgdfgfdggfd", type=TokenType.COMMENT),
+            ],
+        ),
+        (
+            "var a: Int = 1",
+            [
+                Token(text="var", type=TokenType.IDENTIFIER),
+                Token(text="a", type=TokenType.IDENTIFIER),
+                Token(text=":", type=TokenType.PUNCTUATION),
+                Token(text="Int", type=TokenType.TYPE),
+                Token(text="=", type=TokenType.OPERATOR),
+                Token(text="1", type=TokenType.INT_LITERAL),
             ],
         ),
     ]

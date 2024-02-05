@@ -30,6 +30,8 @@ def cases() -> list[tuple[str, Type]]:
         ("var a = 0; \n a = 1;", Unit),
         ("{var a = 0; \n a = 1}", Int),
         ("{var a = 0; \n a = 1;}", Unit),
+        ("var a: Int = 0; \n a = 1", Int),
+        ("{var a: Int = 0; \n a = 1;}", Unit),
     ]
 
 
@@ -52,6 +54,7 @@ def error_cases() -> list[tuple[str, typing.Type[Exception]]]:
         ("var a = 1; \n a = true", IncompatibleTypeException),
         ("a = 1", UnknownTypeException),
         ("var a = 1; \n b = true", UnknownTypeException),
+        ("var a: Bool = 1", IncompatibleTypeException),
     ]
 
 

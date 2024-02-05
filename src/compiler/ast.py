@@ -1,3 +1,4 @@
+import typing
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -47,3 +48,4 @@ class BlockExpression(Expression):
 class VariableDeclarationExpression(Expression):
     name: str
     value: Expression
+    type: Optional[typing.Literal["Int"] | typing.Literal["Bool"] | None] = None
