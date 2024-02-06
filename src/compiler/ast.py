@@ -53,3 +53,16 @@ class VariableDeclarationExpression(Expression):
     name: str
     value: Expression
     type: Optional[TypeExpression | None] = None
+
+
+@dataclass
+class TypeExpression:
+    pass
+
+
+class IntTypeExpression(TypeExpression):
+    pass
+
+
+class BoolTypeExpression(TypeExpression):
+    pass

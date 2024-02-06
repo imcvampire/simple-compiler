@@ -11,7 +11,8 @@ from compiler.ast import (
     BinaryOp,
     VariableDeclarationExpression,
     Identifier,
-    TypeExpression,
+    BoolTypeExpression,
+    IntTypeExpression,
 )
 from compiler.parser_exception import (
     EndOfInputException,
@@ -130,7 +131,12 @@ def parse(tokens: Tokens) -> Expression:
             elif tokens.peek().text not in ["Int", "Bool"]:
                 raise UnknownTypeException(f"{tokens.peek().location}: unknown type")
 
-            var_type = TypeExpression(tokens.consume().text)
+            match tokens.consume().text:
+                case "Int":
+                    var_type = IntTypeExpression()
+                case "Bool":
+                    var_type = BoolTypeExpression()
+
         tokens.consume("=")
         value = parse_leaf_construct()
         return VariableDeclarationExpression(name, value, var_type)

@@ -11,7 +11,8 @@ from compiler.ast import (
     BlockExpression,
     VariableDeclarationExpression,
     Identifier,
-    TypeExpression,
+    IntTypeExpression,
+    BoolTypeExpression,
 )
 from compiler.parser import parse
 from compiler.parser_exception import (
@@ -404,7 +405,15 @@ def cases() -> list[tuple[str, Expression]]:
             VariableDeclarationExpression(
                 name="a",
                 value=Literal(value=1),
-                type=TypeExpression("Int"),
+                type=IntTypeExpression(),
+            ),
+        ),
+        (
+            "var a: Bool = true",
+            VariableDeclarationExpression(
+                name="a",
+                value=Literal(value=True),
+                type=BoolTypeExpression(),
             ),
         ),
         (

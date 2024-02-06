@@ -9,8 +9,10 @@ from compiler.ast import (
     VariableDeclarationExpression,
     Identifier,
     BlockExpression,
+    IntTypeExpression,
+    BoolTypeExpression,
 )
-from compiler.type import Int, Type, Bool, Unit, PrimitiveType
+from compiler.type import Int, Type, Bool, Unit
 from compiler.type_checker_exception import (
     UnknownTypeException,
     IncompatibleTypeException,
@@ -60,6 +62,11 @@ operator_types: list[tuple[list[str], Callable[[list[Type]], Type]]] = [
     (["and", "or"], create_typecheck_binary_operator(["and", "or"], Bool, Bool)),
     (["print_int"], create_typecheck([Int], Unit)),
     (["print_bool"], create_typecheck([Bool], Unit)),
+]
+
+ast_types = [
+    (IntTypeExpression, Int),
+    (BoolTypeExpression, Bool),
 ]
 
 
@@ -121,12 +128,19 @@ def typecheck(
             identifier_types[node.name] = typecheck(node.value, identifier_types)
 
             if node.type is not None:
-                if node.type.type not in ["Int", "Bool"]:
-                    raise UnknownTypeException(f"Unknown type: {node.type}")
-                elif identifier_types[node.name] != PrimitiveType(node.type.type):
-                    raise IncompatibleTypeException(
-                        f"Incompatible types. Expect {PrimitiveType(node.type.type)}, got: {identifier_types[node.name]}"
-                    )
+                # if node.type.type not in ["Int", "Bool"]:
+                #     raise UnknownTypeException(f"Unknown type: {node.type}")
+                # elif identifier_types[node.name] != PrimitiveType(node.type.type):
+                #     raise IncompatibleTypeException(
+                #         f"Incompatible types. Expect {PrimitiveType(node.type.type)}, got: {identifier_types[node.name]}"
+                #     )
+
+                for type_expression, _type in ast_types:
+                    if isinstance(node.type, type_expression):
+                        if identifier_types[node.name] is not _type:
+                            raise IncompatibleTypeException(
+                                f"Incompatible types. Expect {_type}, got: {identifier_types[node.name]}"
+                            )
 
             return identifier_types[node.name]
         case Identifier():
