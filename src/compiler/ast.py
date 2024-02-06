@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
+from compiler.type import Unit, Type
+
 
 @dataclass
 class TypeExpression:
@@ -21,7 +23,7 @@ class UnitTypeExpression(TypeExpression):
 
 @dataclass
 class Expression:
-    type: TypeExpression = field(kw_only=True, default=UnitTypeExpression)
+    type: Type = field(kw_only=True, default=Unit)
 
 
 @dataclass
