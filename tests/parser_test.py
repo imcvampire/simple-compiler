@@ -405,7 +405,7 @@ def cases() -> list[tuple[str, Expression]]:
             VariableDeclarationExpression(
                 name="a",
                 value=Literal(value=1),
-                type=IntTypeExpression(),
+                type_expression=IntTypeExpression(),
             ),
         ),
         (
@@ -413,7 +413,7 @@ def cases() -> list[tuple[str, Expression]]:
             VariableDeclarationExpression(
                 name="a",
                 value=Literal(value=True),
-                type=BoolTypeExpression(),
+                type_expression=BoolTypeExpression(),
             ),
         ),
         (

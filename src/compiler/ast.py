@@ -3,8 +3,25 @@ from typing import Optional
 
 
 @dataclass
-class Expression:
+class TypeExpression:
     pass
+
+
+class IntTypeExpression(TypeExpression):
+    pass
+
+
+class BoolTypeExpression(TypeExpression):
+    pass
+
+
+class UnitTypeExpression(TypeExpression):
+    pass
+
+
+@dataclass
+class Expression:
+    type: TypeExpression = field(kw_only=True, default=UnitTypeExpression)
 
 
 @dataclass
@@ -44,25 +61,7 @@ class BlockExpression(Expression):
 
 
 @dataclass
-class TypeExpression(Expression):
-    type: str
-
-
-@dataclass
 class VariableDeclarationExpression(Expression):
     name: str
     value: Expression
-    type: Optional[TypeExpression | None] = None
-
-
-@dataclass
-class TypeExpression:
-    pass
-
-
-class IntTypeExpression(TypeExpression):
-    pass
-
-
-class BoolTypeExpression(TypeExpression):
-    pass
+    type_expression: Optional[TypeExpression | None] = None
