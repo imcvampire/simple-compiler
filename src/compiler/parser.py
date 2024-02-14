@@ -35,8 +35,9 @@ left_associative_binary_operators = [
 
 class Scope(Enum):
     TOP_LEVEL = 0
-    BLOCK = 1
-    LOCAL = 2
+    TOP_LEVEL_EXPRESSION = 1
+    BLOCK = 2
+    LOCAL = 3
 
 
 def parse(tokens: Tokens) -> Expression:
@@ -115,7 +116,11 @@ def parse(tokens: Tokens) -> Expression:
         return BlockExpression(nested_expressions, result)
 
     def parse_variable_declaration_expression() -> Expression:
-        if current_scope not in [Scope.TOP_LEVEL, Scope.BLOCK]:
+        if current_scope not in [
+            Scope.TOP_LEVEL,
+            Scope.TOP_LEVEL_EXPRESSION,
+            Scope.BLOCK,
+        ]:
             raise VariableCannotBeDeclaredException(
                 f"{tokens.peek().location}: variable declaration is not in local scope here"
             )
@@ -227,9 +232,23 @@ def parse(tokens: Tokens) -> Expression:
                 tokens.consume(";")
 
                 if tokens.peek().type == TokenType.END:
-                    return left
+                    return BlockExpression([left], Literal(None))
 
-                left = BlockExpression([left, parse_expression()], Literal(None))
+                expressions = [left]
+
+                with scope(Scope.TOP_LEVEL_EXPRESSION):
+                    while not (
+                        tokens.peek().text == "}" or tokens.peek().type == TokenType.END
+                    ):
+                        expressions.append(parse_expression())
+
+                left = BlockExpression(expressions, Literal(None))
+            elif (
+                current_scope is Scope.TOP_LEVEL_EXPRESSION
+                and tokens.peek().text == ";"
+            ):
+                tokens.consume(";")
+                return left
             else:
                 return left
 

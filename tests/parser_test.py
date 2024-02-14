@@ -187,6 +187,17 @@ def cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            "var x = 1234;",
+            BlockExpression(
+                expressions=[
+                    VariableDeclarationExpression(
+                        name="x",
+                        value=Literal(value=1234),
+                    ),
+                ]
+            ),
+        ),
+        (
             "var x = 123",
             VariableDeclarationExpression(
                 name="x",
@@ -401,6 +412,26 @@ def cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            "var a = 0; var b = 1; a = 1;",
+            BlockExpression(
+                expressions=[
+                    VariableDeclarationExpression(
+                        name="a",
+                        value=Literal(value=0),
+                    ),
+                    VariableDeclarationExpression(
+                        name="b",
+                        value=Literal(value=1),
+                    ),
+                    BinaryOp(
+                        left=Identifier(name="a"),
+                        op="=",
+                        right=Literal(value=1),
+                    ),
+                ],
+            ),
+        ),
+        (
             "var a: Int = 1",
             VariableDeclarationExpression(
                 name="a",
@@ -425,7 +456,8 @@ def cases() -> list[tuple[str, Expression]]:
 
 @pytest.mark.parametrize("test_input,expected", cases())
 def test_parser_parse(test_input: str, expected: Expression) -> None:
-    assert parse(Tokens(tokens=tokenize(test_input))) == expected
+    result = parse(Tokens(tokens=tokenize(test_input)))
+    assert result == expected
 
 
 def error_cases() -> list[tuple[str, Type[Exception]]]:

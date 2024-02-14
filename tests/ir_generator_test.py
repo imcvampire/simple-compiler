@@ -19,14 +19,21 @@ from compiler.type_checker import typecheck
 
 def cases() -> list[tuple[str, list[Instruction]]]:
     return [
-        # (
-        #     "var a = 1;",
-        #     [Label(name="a"), LoadIntConst(1, IRVar("x")), Return()],
-        # ),
-        # (
-        #     "1 == 1",
-        #     [LoadIntConst(1, IRVar("v0")), LoadIntConst(1, IRVar("v1")), Return()],
-        # )
+        (
+            "var a = 1;",
+            [Label("Start"), LoadIntConst(1, IRVar("a")), Return()],
+        ),
+        (
+            "1 == 1",
+            [
+                Label("Start"),
+                LoadIntConst(1, IRVar("v0")),
+                LoadIntConst(1, IRVar("v1")),
+                Call(IRVar("=="), [IRVar("v0"), IRVar("v1")], IRVar("v2")),
+                Call(IRVar("print_bool"), [IRVar("v2")], IRVar("v3")),
+                Return(),
+            ],
+        ),
         (
             "1 + 2 * 3",
             [
@@ -68,6 +75,24 @@ def cases() -> list[tuple[str, list[Instruction]]]:
                 Label(name="L_1"),
                 LoadIntConst(2, IRVar("v4")),
                 Label(name="L_2"),
+                Return(),
+            ],
+        ),
+        (
+            "{ var a = 1; var b = 2; }",
+            [
+                Label(name="Start"),
+                LoadIntConst(1, IRVar("a")),
+                LoadIntConst(2, IRVar("b")),
+                Return(),
+            ],
+        ),
+        (
+            "{ var a = 1; a }",
+            [
+                Label(name="Start"),
+                LoadIntConst(1, IRVar("a")),
+                Call(IRVar("print_int"), [IRVar("a")], IRVar("v0")),
                 Return(),
             ],
         ),

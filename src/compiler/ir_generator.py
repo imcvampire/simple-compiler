@@ -1,3 +1,5 @@
+from typing import Optional
+
 import compiler.ast as ast
 import compiler.ir as ir
 from compiler.ir import IRVar, SymTab, Label, Return
@@ -28,10 +30,15 @@ def _generate_ir(
     next_var_number = 0
     next_label_number = 0
 
-    def new_var(t: Type) -> IRVar:
+    def new_var(t: Type, name: Optional[str] = None) -> IRVar:
         nonlocal next_var_number
-        var = IRVar(f"v{next_var_number}")
-        next_var_number += 1
+
+        if name is None:
+            var = IRVar(f"v{next_var_number}")
+            next_var_number += 1
+        else:
+            var = IRVar(name)
+
         var_types[var] = t
         return var
 
@@ -54,18 +61,15 @@ def _generate_ir(
     # (which may be shadowed) to unique IR variables.
     # The symbol table will be updated in the same way as
     # in the interpreter and type checker.
-    def visit(st: SymTab, expr: ast.Expression) -> IRVar:
+    def visit(st: SymTab, expr: ast.Expression, name: Optional[str] = None) -> IRVar:
         # loc = expr.location
         loc = None
 
         match expr:
             case ast.Literal():
-                # Create an IR variable to hold the value,
-                # and emit the correct instruction to
-                # load the constant value.
                 match expr.value:
                     case bool():
-                        var = new_var(Bool)
+                        var = new_var(Bool, name)
                         ins.append(
                             ir.LoadBoolConst(
                                 # loc,
@@ -74,7 +78,7 @@ def _generate_ir(
                             )
                         )
                     case int():
-                        var = new_var(Int)
+                        var = new_var(Int, name)
                         ins.append(
                             ir.LoadIntConst(
                                 # loc,
@@ -169,6 +173,20 @@ def _generate_ir(
 
                     return var_unit
 
+            case ast.BlockExpression():
+                for subexpr in expr.expressions:
+                    visit(st, subexpr)
+
+                if expr.result is not None:
+                    return visit(st, expr.result)
+
+            case ast.VariableDeclarationExpression():
+                var = visit(st, expr.value, expr.name)
+
+                st.add_local(var)
+
+                return var
+
             case _:
                 raise Exception(f"{loc}: unsupported expression: {type(expr)}")
 
@@ -185,23 +203,24 @@ def _generate_ir(
     # Start visiting the AST from the root.
     var_final_result = visit(root_symtab, root_expr)
 
-    if var_types[var_final_result] == Int:
-        ins.append(
-            ir.Call(
-                # loc,
-                IRVar("print_int"),
-                [var_final_result],
-                new_var(Int),
+    if root_expr is not ast.BlockExpression() or root_expr.result is not None:
+        if var_types[var_final_result] == Int:
+            ins.append(
+                ir.Call(
+                    # loc,
+                    IRVar("print_int"),
+                    [var_final_result],
+                    new_var(Int),
+                )
             )
-        )
-    elif var_types[var_final_result] == Bool:
-        ins.append(
-            ir.Call(
-                # loc,
-                IRVar("print_bool"),
-                [var_final_result],
-                new_var(Bool),
+        elif var_types[var_final_result] == Bool:
+            ins.append(
+                ir.Call(
+                    # loc,
+                    IRVar("print_bool"),
+                    [var_final_result],
+                    new_var(Bool),
+                )
             )
-        )
 
     return ins

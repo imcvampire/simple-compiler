@@ -35,9 +35,6 @@ class SymTab:
 
         return None
 
-    def __getitem__(self, item: IRVar) -> Optional[IRVar]:
-        return self.find(item)
-
     def require(self, name: str) -> IRVar:
         if name in [
             "=",
@@ -62,6 +59,9 @@ class SymTab:
             raise Exception(f"symbol {name} not found")
 
         return result
+
+    def __getitem__(self, item: IRVar) -> Optional[IRVar]:
+        return self.find(item)
 
 
 @dataclass(frozen=True)
