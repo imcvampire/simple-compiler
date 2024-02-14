@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from enum import Enum
-from typing import Iterator
+from typing import Iterator, Optional
 
 from compiler.ast import (
     Literal,
@@ -122,7 +122,7 @@ def parse(tokens: Tokens) -> Expression:
 
         tokens.consume("var")
         name = tokens.consume().text
-        var_type = None
+        var_type: Optional[IntTypeExpression | BoolTypeExpression] = None
         if tokens.peek().text == ":":
             tokens.consume(":")
 
