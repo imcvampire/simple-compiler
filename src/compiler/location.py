@@ -9,8 +9,8 @@ class Location:
     line: str
     column: str
 
-    def __eq__(self, other: Location) -> bool:
-        if other == L:
+    def __eq__(self, other: object) -> bool:
+        if other is L:
             return True
 
         return super.__eq__(self, other)

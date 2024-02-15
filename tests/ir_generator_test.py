@@ -96,11 +96,21 @@ def cases() -> list[tuple[str, list[Instruction]]]:
                 Return(),
             ],
         ),
+        (
+            "print_int(1)",
+            [
+                Label(name="Start"),
+                LoadIntConst(1, IRVar("v0")),
+                Call(IRVar("print_int"), [IRVar("v0")], IRVar("v1")),
+                Call(IRVar("print_int"), [IRVar("v1")], IRVar("v2")),
+                Return(),
+            ],
+        ),
     ]
 
 
 @pytest.mark.parametrize("test_input,expected", cases())
-def test_parser_parse(test_input: str, expected: list[Instruction]) -> None:
+def test_generate_ir(test_input: str, expected: list[Instruction]) -> None:
     node = parse(Tokens(tokenize(test_input)))
     typecheck(node)
 

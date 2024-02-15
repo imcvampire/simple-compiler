@@ -455,7 +455,7 @@ def cases() -> list[tuple[str, Expression]]:
 
 
 @pytest.mark.parametrize("test_input,expected", cases())
-def test_parser_parse(test_input: str, expected: Expression) -> None:
+def test_parse(test_input: str, expected: Expression) -> None:
     result = parse(Tokens(tokens=tokenize(test_input)))
     assert result == expected
 
@@ -472,9 +472,7 @@ def error_cases() -> list[tuple[str, Type[Exception]]]:
 
 
 @pytest.mark.parametrize("test_input,expected_exception", error_cases())
-def test_parser_parse_error(
-    test_input: str, expected_exception: Type[Exception]
-) -> None:
+def test_parse_error(test_input: str, expected_exception: Type[Exception]) -> None:
     with pytest.raises(Exception) as e:
         parse(Tokens(tokens=tokenize(test_input)))
 

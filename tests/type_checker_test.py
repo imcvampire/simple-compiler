@@ -23,8 +23,8 @@ def cases() -> list[tuple[str, Type]]:
         ("if 1 < 2 then 3", Unit),
         ("if 1 < 2 then 3 else 4", Int),
         ("if 1 < 2 then 3 < 4 else 4 < 5", Bool),
-        ("print_int(1)", Unit),
-        ("print_bool(true)", Unit),
+        ("print_int(1)", Int),
+        ("print_bool(true)", Bool),
         ("var a = 1", Int),
         ("var a = 0; \n a = 1", Int),
         ("var a = 0; \n a = 1;", Unit),
@@ -36,7 +36,7 @@ def cases() -> list[tuple[str, Type]]:
 
 
 @pytest.mark.parametrize("test_input,expected", cases())
-def test_type_checker_typecheck(test_input: str, expected: Type) -> None:
+def test_typecheck(test_input: str, expected: Type) -> None:
     assert typecheck(parse(Tokens(tokenize(test_input)))) == expected
 
 
@@ -59,7 +59,7 @@ def error_cases() -> list[tuple[str, typing.Type[Exception]]]:
 
 
 @pytest.mark.parametrize("test_input,expected_exception", error_cases())
-def test_type_checker_typecheck_error(
+def test_typecheck_error(
     test_input: str, expected_exception: typing.Type[Exception]
 ) -> None:
     with pytest.raises(expected_exception):

@@ -63,8 +63,8 @@ operator_types: list[tuple[list[str], Callable[[list[Type]], Type]]] = [
         create_typecheck_binary_operator(["<", ">", "<=", ">=", "==", "!="], Int, Bool),
     ),
     (["and", "or"], create_typecheck_binary_operator(["and", "or"], Bool, Bool)),
-    (["print_int"], create_typecheck([Int], Unit)),
-    (["print_bool"], create_typecheck([Bool], Unit)),
+    (["print_int"], create_typecheck([Int], Int)),
+    (["print_bool"], create_typecheck([Bool], Bool)),
 ]
 
 ast_types: list[tuple[typing.Type[TypeExpression], Type]] = [

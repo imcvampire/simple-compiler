@@ -36,6 +36,7 @@ class SymTab:
         return None
 
     def require(self, name: str) -> IRVar:
+        # built-in functions
         if name in [
             "=",
             "+",
@@ -50,6 +51,8 @@ class SymTab:
             "!=",
             "and",
             "or",
+            "print_int",
+            "print_bool",
         ]:
             return IRVar(name)
 

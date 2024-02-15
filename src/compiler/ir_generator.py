@@ -2,7 +2,7 @@ from typing import Optional
 
 import compiler.ast as ast
 import compiler.ir as ir
-from compiler.ir import IRVar, SymTab, Label, Return
+from compiler.ir import IRVar, SymTab, Label, Return, Call, CondJump, Jump
 from compiler.type import Bool, Int, Type, Unit
 
 
@@ -51,6 +51,26 @@ def _generate_ir(
     # We collect the IR instructions that we generate
     # into this list.
     ins: list[ir.Instruction] = []
+
+    def add_ending_print_ir(var_final: IRVar) -> None:
+        if var_types[var_final] == Int:
+            ins.append(
+                Call(
+                    # loc,
+                    IRVar("print_int"),
+                    [var_final],
+                    new_var(Int),
+                )
+            )
+        elif var_types[var_final] == Bool:
+            ins.append(
+                Call(
+                    # loc,
+                    IRVar("print_bool"),
+                    [var_final],
+                    new_var(Bool),
+                )
+            )
 
     # This function visits an AST node,
     # appends IR instructions to 'ins',
@@ -129,7 +149,7 @@ def _generate_ir(
 
                     var_cond = visit(st, expr.condition)
                     ins.append(
-                        ir.CondJump(
+                        CondJump(
                             # loc,
                             var_cond,
                             l_then,
@@ -150,7 +170,7 @@ def _generate_ir(
 
                     var_cond = visit(st, expr.condition)
                     ins.append(
-                        ir.CondJump(
+                        CondJump(
                             # loc,
                             var_cond,
                             l_then,
@@ -161,7 +181,7 @@ def _generate_ir(
 
                     var_then = visit(st, expr.then_clause)
                     ins.append(
-                        ir.Jump(
+                        Jump(
                             l_end,
                         )
                     )
@@ -187,6 +207,16 @@ def _generate_ir(
 
                 return var
 
+            case ast.FunctionExpression():
+                var_op = st.require(expr.name)
+                var_args = [visit(st, arg) for arg in expr.arguments]
+
+                var_result = new_var(expr.type)
+
+                ins.append(Call(var_op, var_args, var_result))
+
+                return var_result
+
             case _:
                 raise Exception(f"{loc}: unsupported expression: {type(expr)}")
 
@@ -203,24 +233,11 @@ def _generate_ir(
     # Start visiting the AST from the root.
     var_final_result = visit(root_symtab, root_expr)
 
-    if root_expr is not ast.BlockExpression() or root_expr.result is not None:
-        if var_types[var_final_result] == Int:
-            ins.append(
-                ir.Call(
-                    # loc,
-                    IRVar("print_int"),
-                    [var_final_result],
-                    new_var(Int),
-                )
-            )
-        elif var_types[var_final_result] == Bool:
-            ins.append(
-                ir.Call(
-                    # loc,
-                    IRVar("print_bool"),
-                    [var_final_result],
-                    new_var(Bool),
-                )
-            )
+    match root_expr:
+        case ast.BlockExpression():
+            if root_expr.result is not None:
+                add_ending_print_ir(var_final_result)
+        case _:
+            add_ending_print_ir(var_final_result)
 
     return ins
