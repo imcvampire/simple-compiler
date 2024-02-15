@@ -106,7 +106,16 @@ def cases() -> list[tuple[str, list[Instruction]]]:
                 Return(),
             ],
         ),
-    ]
+        (
+            "print_int(1);",
+            [
+                Label(name="Start"),
+                LoadIntConst(1, IRVar("v0")),
+                Call(IRVar("print_int"), [IRVar("v0")], IRVar("v1")),
+                Return(),
+            ],
+        ),
+            ]
 
 
 @pytest.mark.parametrize("test_input,expected", cases())
