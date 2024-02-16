@@ -9,6 +9,7 @@ from compiler.ir import (
     Return,
     CondJump,
     Jump,
+    LoadBoolConst,
 )
 from compiler.ir_generator import generate_ir
 from compiler.parser import parse
@@ -107,15 +108,15 @@ def cases() -> list[tuple[str, list[Instruction]]]:
             ],
         ),
         (
-            "print_int(1);",
+            "print_bool(true);",
             [
                 Label(name="Start"),
-                LoadIntConst(1, IRVar("v0")),
-                Call(IRVar("print_int"), [IRVar("v0")], IRVar("v1")),
+                LoadBoolConst(True, IRVar("v0")),
+                Call(IRVar("print_bool"), [IRVar("v0")], IRVar("v1")),
                 Return(),
             ],
         ),
-            ]
+    ]
 
 
 @pytest.mark.parametrize("test_input,expected", cases())
