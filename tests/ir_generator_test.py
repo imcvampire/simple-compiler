@@ -10,6 +10,7 @@ from compiler.ir import (
     CondJump,
     Jump,
     LoadBoolConst,
+    Copy,
 )
 from compiler.ir_generator import generate_ir
 from compiler.parser import parse
@@ -94,6 +95,17 @@ def cases() -> list[tuple[str, list[Instruction]]]:
                 Label(name="Start"),
                 LoadIntConst(1, IRVar("a")),
                 Call(IRVar("print_int"), [IRVar("a")], IRVar("v0")),
+                Return(),
+            ],
+        ),
+        (
+            "{ var a = 1; var b = 2; a = 3 }",
+            [
+                Label(name="Start"),
+                LoadIntConst(1, IRVar("a")),
+                LoadIntConst(2, IRVar("b")),
+                LoadIntConst(3, IRVar("v0")),
+                Copy(IRVar("v0"), IRVar("a")),
                 Return(),
             ],
         ),

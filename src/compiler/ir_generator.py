@@ -2,7 +2,7 @@ from typing import Optional
 
 import compiler.ast as ast
 import compiler.ir as ir
-from compiler.ir import IRVar, SymTab, Label, Return, Call, CondJump, Jump
+from compiler.ir import IRVar, SymTab, Label, Return, Call, CondJump, Jump, Copy
 from compiler.type import Bool, Int, Type, Unit
 
 
@@ -53,6 +53,7 @@ def _generate_ir(
     ins: list[ir.Instruction] = []
 
     def add_ending_print_ir(var_final: IRVar) -> None:
+        if var_final is None: return
         if var_types[var_final] == Int:
             ins.append(
                 Call(
@@ -123,24 +124,34 @@ def _generate_ir(
                 return st.require(expr.name)
 
             case ast.BinaryOp():
-                # Ask the symbol table to return the variable that refers
-                # to the operator to call.
                 var_op = st.require(expr.op)
-                # Recursively emit instructions to calculate the operands.
-                var_left = visit(st, expr.left)
-                var_right = visit(st, expr.right)
-                # Generate variable to hold the result.
-                var_result = new_var(expr.type)
-                # Emit a Call instruction that writes to that variable.
-                ins.append(
-                    ir.Call(
-                        # loc,
-                        var_op,
-                        [var_left, var_right],
-                        var_result,
-                    )
-                )
-                return var_result
+
+                match expr.op:
+                    case "=":
+                        var_left = st.require(expr.left.name)
+                        var_right = visit(st, expr.right)
+
+                        ins.append(Copy(var_right, var_left))
+                    case "==", "!=":
+                        pass
+                    case "and", "or":
+                        pass
+                    case _:
+                        var_left = visit(st, expr.left)
+                        var_right = visit(st, expr.right)
+
+                        var_result = new_var(expr.type)
+
+                        ins.append(
+                            ir.Call(
+                                # loc,
+                                var_op,
+                                [var_left, var_right],
+                                var_result,
+                            )
+                        )
+
+                        return var_result
 
             case ast.IfExpression():
                 if expr.else_clause is None:
