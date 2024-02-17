@@ -64,7 +64,7 @@ def parse(tokens: Tokens) -> Expression:
         if tokens.peek().type != TokenType.BOOL_LITERAL:
             raise Exception(f"{tokens.peek().location}: expected a bool literal")
         token = tokens.consume()
-        return Literal(bool(token.text))
+        return Literal(True if token.text == "true" else False)
 
     def parse_identifier() -> Identifier:
         if tokens.peek().type != TokenType.IDENTIFIER:

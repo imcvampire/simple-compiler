@@ -1,8 +1,17 @@
-from typing import Optional
-
 import compiler.ast as ast
 import compiler.ir as ir
-from compiler.ir import IRVar, SymTab, Label, Return, Call, CondJump, Jump, Copy
+from compiler.ir import (
+    IRVar,
+    SymTab,
+    Label,
+    Return,
+    Call,
+    CondJump,
+    Jump,
+    Copy,
+    LoadBoolConst,
+    LoadIntConst,
+)
 from compiler.type import Bool, Int, Type, Unit
 
 
@@ -30,14 +39,11 @@ def _generate_ir(
     next_var_number = 0
     next_label_number = 0
 
-    def new_var(t: Type, name: Optional[str] = None) -> IRVar:
+    def new_var(t: Type) -> IRVar:
         nonlocal next_var_number
 
-        if name is None:
-            var = IRVar(f"v{next_var_number}")
-            next_var_number += 1
-        else:
-            var = IRVar(name)
+        var = IRVar(f"v{next_var_number}")
+        next_var_number += 1
 
         var_types[var] = t
         return var
@@ -53,7 +59,8 @@ def _generate_ir(
     ins: list[ir.Instruction] = []
 
     def add_ending_print_ir(var_final: IRVar) -> None:
-        if var_final is None: return
+        # if var_final is None:
+        #     return
         if var_types[var_final] == Int:
             ins.append(
                 Call(
@@ -82,7 +89,7 @@ def _generate_ir(
     # (which may be shadowed) to unique IR variables.
     # The symbol table will be updated in the same way as
     # in the interpreter and type checker.
-    def visit(st: SymTab, expr: ast.Expression, name: Optional[str] = None) -> IRVar:
+    def visit(st: SymTab, expr: ast.Expression) -> IRVar:
         # loc = expr.location
         loc = None
 
@@ -90,18 +97,18 @@ def _generate_ir(
             case ast.Literal():
                 match expr.value:
                     case bool():
-                        var = new_var(Bool, name)
+                        var = new_var(Bool)
                         ins.append(
-                            ir.LoadBoolConst(
+                            LoadBoolConst(
                                 # loc,
                                 expr.value,
                                 var,
                             )
                         )
                     case int():
-                        var = new_var(Int, name)
+                        var = new_var(Int)
                         ins.append(
-                            ir.LoadIntConst(
+                            LoadIntConst(
                                 # loc,
                                 expr.value,
                                 var,
@@ -126,16 +133,46 @@ def _generate_ir(
             case ast.BinaryOp():
                 var_op = st.require(expr.op)
 
-                match expr.op:
+                match var_op.name:
                     case "=":
+                        if not isinstance(expr.left, ast.Identifier):
+                            raise Exception(
+                                f"{loc}: left-hand side of assignment must be an identifier"
+                            )
+
                         var_left = st.require(expr.left.name)
                         var_right = visit(st, expr.right)
 
                         ins.append(Copy(var_right, var_left))
+
+                        return var_unit
                     case "==", "!=":
-                        pass
-                    case "and", "or":
-                        pass
+                        # TODO
+                        return var_unit
+                    case "and":
+                        # TODO
+                        return var_unit
+                    case "or":
+                        label_skip = new_label()
+                        label_right = new_label()
+                        label_end = new_label()
+
+                        var_result = new_var(Bool)
+
+                        var_left = visit(st, expr.left)
+                        ins.append(CondJump(var_left, label_skip, label_right))
+
+                        ins.append(label_skip)
+                        ins.append(LoadBoolConst(True, var_result))
+                        ins.append(Jump(label_end))
+
+                        ins.append(label_right)
+                        var_right = visit(st, expr.right)
+                        ins.append(Copy(var_right, var_result))
+
+                        ins.append(label_end)
+
+                        return var_result
                     case _:
                         var_left = visit(st, expr.left)
                         var_right = visit(st, expr.right)
@@ -212,9 +249,12 @@ def _generate_ir(
                     return visit(st, expr.result)
 
             case ast.VariableDeclarationExpression():
-                var = visit(st, expr.value, expr.name)
+                var_value = visit(st, expr.value)
+                var = new_var(expr.type)
 
-                st.add_local(var)
+                ins.append(Copy(var_value, var))
+
+                st.add_local(expr.name, var)
 
                 return var
 
@@ -239,7 +279,7 @@ def _generate_ir(
     # In the Assembly generator stage, we will give
     # definitions for these globals. For now,
     # they just need to exist.
-    root_symtab = SymTab([k for k in root_types.keys()])
+    root_symtab = SymTab([(k.name, k) for k in root_types.keys()])
 
     # Start visiting the AST from the root.
     var_final_result = visit(root_symtab, root_expr)

@@ -17,18 +17,18 @@ class IRVar:
 
 @dataclass
 class SymTab:
-    symbols: list[IRVar]
+    symbols: list[tuple[str, IRVar]]
     parent: Optional[SymTab] = None
 
-    def add_local(self, symbol: IRVar) -> None:
-        if symbol in self.symbols:
+    def add_local(self, symbol: str, var: IRVar) -> None:
+        if symbol in self.__get_symbols():
             raise Exception(f"symbol {symbol} already defined")
 
-        self.symbols.append(symbol)
+        self.symbols.append((symbol, var))
 
-    def find(self, symbol: IRVar) -> Optional[IRVar]:
-        if symbol in self.symbols:
-            return self.symbols[self.symbols.index(symbol)]
+    def find(self, symbol: str) -> Optional[IRVar]:
+        if symbol in self.__get_symbols():
+            return self.symbols[self.__get_symbols().index(symbol)][1]
 
         if self.parent:
             return self.parent.find(symbol)
@@ -56,15 +56,15 @@ class SymTab:
         ]:
             return IRVar(name)
 
-        result = self.find(IRVar(name))
+        result = self.find(name)
 
         if result is None:
             raise Exception(f"symbol {name} not found")
 
         return result
 
-    def __getitem__(self, item: IRVar) -> Optional[IRVar]:
-        return self.find(item)
+    def __get_symbols(self) -> list[str]:
+        return [s[0] for s in self.symbols]
 
 
 @dataclass(frozen=True)

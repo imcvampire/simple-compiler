@@ -23,7 +23,12 @@ def cases() -> list[tuple[str, list[Instruction]]]:
     return [
         (
             "var a = 1;",
-            [Label("Start"), LoadIntConst(1, IRVar("a")), Return()],
+            [
+                Label("Start"),
+                LoadIntConst(1, IRVar("v0")),
+                Copy(IRVar("v0"), IRVar("v1")),
+                Return(),
+            ],
         ),
         (
             "1 == 1",
@@ -46,6 +51,31 @@ def cases() -> list[tuple[str, list[Instruction]]]:
                 Call(IRVar("*"), [IRVar("v1"), IRVar("v2")], IRVar("v3")),
                 Call(IRVar("+"), [IRVar("v0"), IRVar("v3")], IRVar("v4")),
                 Call(IRVar("print_int"), [IRVar("v4")], IRVar("v5")),
+                Return(),
+            ],
+        ),
+        (
+            """
+            var a = false;
+true or { a = true; a };
+print_bool(a);
+""",
+            [
+                Label(name="Start"),
+                LoadBoolConst(False, IRVar("v0")),
+                Copy(IRVar("v0"), IRVar("v1")),
+                # v2 is or result
+                LoadBoolConst(True, IRVar("v3")),
+                CondJump(IRVar("v3"), Label("L_0"), Label("L_1")),
+                Label(name="L_0"),
+                LoadBoolConst(True, IRVar("v2")),
+                Jump(Label("L_2")),
+                Label(name="L_1"),
+                LoadBoolConst(True, IRVar("v4")),
+                Copy(IRVar("v4"), IRVar("v1")),
+                Copy(IRVar("v1"), IRVar("v2")),
+                Label(name="L_2"),
+                Call(IRVar("print_bool"), [IRVar("v1")], IRVar("v5")),
                 Return(),
             ],
         ),
@@ -84,8 +114,10 @@ def cases() -> list[tuple[str, list[Instruction]]]:
             "{ var a = 1; var b = 2; }",
             [
                 Label(name="Start"),
-                LoadIntConst(1, IRVar("a")),
-                LoadIntConst(2, IRVar("b")),
+                LoadIntConst(1, IRVar("v0")),
+                Copy(IRVar("v0"), IRVar("v1")),
+                LoadIntConst(2, IRVar("v2")),
+                Copy(IRVar("v2"), IRVar("v3")),
                 Return(),
             ],
         ),
@@ -93,8 +125,9 @@ def cases() -> list[tuple[str, list[Instruction]]]:
             "{ var a = 1; a }",
             [
                 Label(name="Start"),
-                LoadIntConst(1, IRVar("a")),
-                Call(IRVar("print_int"), [IRVar("a")], IRVar("v0")),
+                LoadIntConst(1, IRVar("v0")),
+                Copy(IRVar("v0"), IRVar("v1")),
+                Call(IRVar("print_int"), [IRVar("v1")], IRVar("v2")),
                 Return(),
             ],
         ),
@@ -102,10 +135,12 @@ def cases() -> list[tuple[str, list[Instruction]]]:
             "{ var a = 1; var b = 2; a = 3 }",
             [
                 Label(name="Start"),
-                LoadIntConst(1, IRVar("a")),
-                LoadIntConst(2, IRVar("b")),
-                LoadIntConst(3, IRVar("v0")),
-                Copy(IRVar("v0"), IRVar("a")),
+                LoadIntConst(1, IRVar("v0")),
+                Copy(IRVar("v0"), IRVar("v1")),
+                LoadIntConst(2, IRVar("v2")),
+                Copy(IRVar("v2"), IRVar("v3")),
+                LoadIntConst(3, IRVar("v4")),
+                Copy(IRVar("v4"), IRVar("v1")),
                 Return(),
             ],
         ),
