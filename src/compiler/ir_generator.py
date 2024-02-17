@@ -50,7 +50,7 @@ def _generate_ir(
 
     def new_label() -> ir.Label:
         nonlocal next_label_number
-        label = ir.Label(f"L_{next_label_number}")
+        label = ir.Label(f"L{next_label_number}")
         next_label_number += 1
         return label
 
