@@ -1,3 +1,5 @@
+import typing
+
 import compiler.ast as ast
 import compiler.ir as ir
 from compiler.ir import (
@@ -80,6 +82,36 @@ def _generate_ir(
                 )
             )
 
+    def handle_logical_operation(
+        st: SymTab, expr: ast.Expression, operation: typing.Literal["and", "or"]
+    ) -> IRVar:
+        label_skip = new_label()
+        label_right = new_label()
+        label_end = new_label()
+
+        var_result = new_var(Bool)
+
+        var_left = visit(st, expr.left)
+
+        match operation:
+            case "and":
+                ins.append(CondJump(var_left, label_right, label_skip))
+            case "or":
+                ins.append(CondJump(var_left, label_skip, label_right))
+
+        ins.append(label_skip)
+        ins.append(LoadBoolConst(operation == "or", var_result))
+        ins.append(Jump(label_end))
+
+        ins.append(label_right)
+        var_right = visit(st, expr.right)
+        ins.append(Copy(var_right, var_result))
+        ins.append(Jump(label_end))
+
+        ins.append(label_end)
+
+        return var_result
+
     # This function visits an AST node,
     # appends IR instructions to 'ins',
     # and returns the IR variable where
@@ -146,33 +178,10 @@ def _generate_ir(
                         ins.append(Copy(var_right, var_left))
 
                         return var_unit
-                    case "==", "!=":
-                        # TODO
-                        return var_unit
                     case "and":
-                        # TODO
-                        return var_unit
+                        return handle_logical_operation(st, expr, "and")
                     case "or":
-                        label_skip = new_label()
-                        label_right = new_label()
-                        label_end = new_label()
-
-                        var_result = new_var(Bool)
-
-                        var_left = visit(st, expr.left)
-                        ins.append(CondJump(var_left, label_skip, label_right))
-
-                        ins.append(label_skip)
-                        ins.append(LoadBoolConst(True, var_result))
-                        ins.append(Jump(label_end))
-
-                        ins.append(label_right)
-                        var_right = visit(st, expr.right)
-                        ins.append(Copy(var_right, var_result))
-
-                        ins.append(label_end)
-
-                        return var_result
+                        return handle_logical_operation(st, expr, "or")
                     case _:
                         var_left = visit(st, expr.left)
                         var_right = visit(st, expr.right)

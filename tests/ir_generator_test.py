@@ -56,10 +56,10 @@ def cases() -> list[tuple[str, list[Instruction]]]:
         ),
         (
             """
-            var a = false;
-true or { a = true; a };
-print_bool(a);
-""",
+                var a = false;
+                true or { a = true; a };
+                print_bool(a);
+            """,
             [
                 Label(name="Start"),
                 LoadBoolConst(False, IRVar("v0")),
@@ -74,8 +74,37 @@ print_bool(a);
                 LoadBoolConst(True, IRVar("v4")),
                 Copy(IRVar("v4"), IRVar("v1")),
                 Copy(IRVar("v1"), IRVar("v2")),
+                Jump(Label("L2")),
                 Label(name="L2"),
                 Call(IRVar("print_bool"), [IRVar("v1")], IRVar("v5")),
+                Return(),
+            ],
+        ),
+        (
+            """
+                var a = 1;
+                false and { a = 2; a == 2 }
+                print_int(a);
+            """,
+            [
+                Label(name="Start"),
+                LoadIntConst(1, IRVar("v0")),
+                Copy(IRVar("v0"), IRVar("v1")),
+                # v2 is and result
+                LoadBoolConst(False, IRVar("v3")),
+                CondJump(IRVar("v3"), Label("L1"), Label("L0")),
+                Label(name="L0"),
+                LoadBoolConst(False, IRVar("v2")),
+                Jump(Label("L2")),
+                Label(name="L1"),
+                LoadIntConst(2, IRVar("v4")),
+                Copy(IRVar("v4"), IRVar("v1")),
+                LoadIntConst(2, IRVar("v5")),
+                Call(IRVar("=="), [IRVar("v1"), IRVar("v5")], IRVar("v6")),
+                Copy(IRVar("v6"), IRVar("v2")),
+                Jump(Label("L2")),
+                Label(name="L2"),
+                Call(IRVar("print_int"), [IRVar("v1")], IRVar("v7")),
                 Return(),
             ],
         ),
