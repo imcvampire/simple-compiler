@@ -258,12 +258,9 @@ def parse(tokens: Tokens) -> Expression:
     expression = parse_expression()
 
     if (
-        current_scope is Scope.TOP_LEVEL
-        and isinstance(expression, BlockExpression)
-        and (
-            tokens.prev_token().text not in [";", "}"]
-            and len(expression.expressions) > 0
-        )
+        isinstance(expression, BlockExpression)
+        and tokens.prev_token().text not in [";", "}"]
+        and len(expression.expressions) > 0
     ):
         expression.result = expression.expressions.pop()
 
