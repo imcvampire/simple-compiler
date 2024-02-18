@@ -23,10 +23,10 @@ def generate_ir(
     root_types: dict[IRVar, Type],
     root_expr: ast.Expression,
 ) -> list[ir.Instruction]:
-    return [Label(name="Start"), *_generate_ir(root_types, root_expr), Return()]
+    return [Label(name="Start"), *__generate_ir(root_types, root_expr), Return()]
 
 
-def _generate_ir(
+def __generate_ir(
     # 'root_types' parameter should map all global names
     # like 'print_int' and '+' to their types.
     root_types: dict[IRVar, Type],

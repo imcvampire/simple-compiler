@@ -77,11 +77,11 @@ ast_types: list[tuple[typing.Type[TypeExpression], Type]] = [
 def typecheck(
     node: Expression, identifier_types: Optional[dict[str, Type]] = None
 ) -> Type:
-    node.type = _typecheck(node, identifier_types)
+    node.type = __typecheck(node, identifier_types)
     return node.type
 
 
-def _typecheck(
+def __typecheck(
     node: Expression, identifier_types: Optional[dict[str, Type]] = None
 ) -> Type:
     match node:
