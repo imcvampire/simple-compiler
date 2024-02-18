@@ -83,7 +83,7 @@ def __generate_ir(
             )
 
     def handle_logical_operation(
-        st: SymTab, expr: ast.Expression, operation: typing.Literal["and", "or"]
+        st: SymTab, expr: ast.BinaryOp, operation: typing.Literal["and", "or"]
     ) -> IRVar:
         label_skip = new_label()
         label_right = new_label()
