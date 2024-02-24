@@ -1,8 +1,7 @@
-from typing import Type
-
 import subprocess
 import pytest
 import os
+import pathlib
 
 from compiler.assembler import assemble
 from compiler.assembly_generator import generate_assembly
@@ -38,9 +37,11 @@ def test_assembler_assemble(test_input: str, expected: str) -> None:
     program_name = f"compiled_program_{test_input.replace(' ', '_')}"
     assemble(asm_code, program_name)
 
-    result = subprocess.run(
-        os.path.join(root_dir, program_name), stdout=subprocess.PIPE
-    )
+    program_path = os.path.join(root_dir, program_name)
+
+    result = subprocess.run(program_path, stdout=subprocess.PIPE)
+
+    pathlib.Path.unlink(pathlib.Path(program_path))
 
     assert result.returncode == 0
     assert result.stdout.decode("utf-8") == f"{expected}\n"
