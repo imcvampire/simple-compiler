@@ -33,6 +33,8 @@ def cases() -> list[tuple[str, Type]]:
         ("{var a = 0; \n a = 1;}", Unit),
         ("var a: Int = 0; \n a = 1", Int),
         ("{var a: Int = 0; \n a = 1;}", Unit),
+        ("if not true then 1 else 2", Int),
+        ("var a = -1", Int),
     ]
 
 

@@ -2,6 +2,7 @@ import pytest
 import os
 
 from compiler.assembly_generator import generate_assembly
+from compiler.builtin_type import builtin_types
 from compiler.ir_generator import generate_ir
 from compiler.parser import parse
 from compiler.token import Tokens
@@ -34,6 +35,6 @@ def test_generate_assembly(test_input: str, expected: list[str]) -> None:
     node = parse(Tokens(tokenize(test_input)))
     typecheck(node)
 
-    result = generate_assembly(generate_ir({}, node))
+    result = generate_assembly(generate_ir(builtin_types, node))
 
     assert result == expected

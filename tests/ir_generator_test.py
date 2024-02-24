@@ -196,6 +196,62 @@ def cases() -> list[tuple[str, list[Instruction]]]:
                 Return(),
             ],
         ),
+        (
+            "if not true then -10 else 0",
+            [
+                Label(name="Start"),
+                LoadBoolConst(value=True, dest=IRVar(name="v0")),
+                Call(
+                    fun=IRVar(name="unary_not"),
+                    args=[IRVar(name="v0")],
+                    dest=IRVar(name="v1"),
+                ),
+                CondJump(
+                    cond=IRVar(name="v1"),
+                    then_label=Label(name="L0"),
+                    else_label=Label(name="L1"),
+                ),
+                Label(name="L0"),
+                LoadIntConst(value=10, dest=IRVar(name="v3")),
+                Call(
+                    fun=IRVar(name="unary_-"),
+                    args=[IRVar(name="v3")],
+                    dest=IRVar(name="v4"),
+                ),
+                Copy(source=IRVar(name="v4"), dest=IRVar(name="v2")),
+                Jump(label=Label(name="L2")),
+                Label(name="L1"),
+                LoadIntConst(value=0, dest=IRVar(name="v5")),
+                Copy(source=IRVar(name="v5"), dest=IRVar(name="v2")),
+                Label(name="L2"),
+                Call(
+                    fun=IRVar(name="print_int"),
+                    args=[IRVar(name="v2")],
+                    dest=IRVar(name="v6"),
+                ),
+                Return(),
+            ],
+        ),
+        (
+            "var a = 2; a / 2",
+            [
+                Label(name="Start"),
+                LoadIntConst(value=2, dest=IRVar(name="v0")),
+                Copy(source=IRVar(name="v0"), dest=IRVar(name="v1")),
+                LoadIntConst(value=2, dest=IRVar(name="v2")),
+                Call(
+                    fun=IRVar(name="/"),
+                    args=[IRVar(name="v1"), IRVar(name="v2")],
+                    dest=IRVar(name="v3"),
+                ),
+                Call(
+                    fun=IRVar(name="print_int"),
+                    args=[IRVar(name="v3")],
+                    dest=IRVar(name="v4"),
+                ),
+                Return(),
+            ],
+        ),
     ]
 
 

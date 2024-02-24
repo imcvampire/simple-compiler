@@ -97,6 +97,9 @@ def __typecheck(
                 case _:
                     raise UnknownTypeException(f"Unknown type: {node.value}")
         case BinaryOp():
+            if node.left is None:
+                return typecheck(node.right, identifier_types)
+
             t1 = typecheck(node.left, identifier_types)
             t2 = typecheck(node.right, identifier_types)
 

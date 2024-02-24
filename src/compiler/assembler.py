@@ -31,10 +31,13 @@ def assemble(
         subprocess.run(["as", "-g", "-o" + stdlib_obj, stdlib_asm], check=True)
         subprocess.run(["as", "-g", "-o" + program_obj, program_asm], check=True)
         linker_flags = ["-static", *[f"-l{lib}" for lib in extra_libraries]]
-        subprocess.run(
-            ["ld", "-o" + output_file, *linker_flags, stdlib_obj, program_obj],
-            check=True,
-        )
+        try:
+            subprocess.run(
+                ["ld", "-o" + output_file, *linker_flags, stdlib_obj, program_obj],
+                check=True,
+            )
+        except Exception as e:
+            raise e
 
 
 stdlib_asm_code: str = """

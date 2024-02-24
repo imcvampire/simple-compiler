@@ -83,6 +83,11 @@ def __generate_ir(
     def handle_logical_operation(
         st: SymTab, expr: ast.BinaryOp, operation: typing.Literal["and", "or"]
     ) -> IRVar:
+        if expr.left is None:
+            raise Exception(
+                "Wrong left-hand side of binary operation. It should not be None."
+            )
+
         label_skip = new_label()
         label_right = new_label()
         label_end = new_label()
@@ -161,7 +166,11 @@ def __generate_ir(
                 return st.require(expr.name)
 
             case ast.BinaryOp():
-                var_op = st.require(expr.op)
+                var_op = (
+                    st.require(expr.op)
+                    if expr.left is not None
+                    else st.require(f"unary_{expr.op}")
+                )
 
                 match var_op.name:
                     case "=":
@@ -181,6 +190,22 @@ def __generate_ir(
                     case "or":
                         return handle_logical_operation(st, expr, "or")
                     case _:
+                        if expr.left is None:
+                            var_right = visit(st, expr.right)
+
+                            var_result = new_var(expr.type)
+
+                            ins.append(
+                                ir.Call(
+                                    # loc,
+                                    var_op,
+                                    [var_right],
+                                    var_result,
+                                )
+                            )
+
+                            return var_result
+
                         var_left = visit(st, expr.left)
                         var_right = visit(st, expr.right)
 

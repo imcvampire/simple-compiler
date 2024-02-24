@@ -20,9 +20,42 @@ def cases() -> list[tuple[str, str]]:
         ("1", "1"),
         ("true", "true"),
         ("false", "false"),
-        # ("1 - 2", -1),
+        ("1 - 2", "-1"),
         ("1 == 2", "false"),
         ("true and false", "false"),
+        ("var a = -1; a", "-1"),
+        ("if 1 < 2 then 3", ""),
+        ("if true then 4 else 5", "4"),
+        ("if 1 >= 2 then -1 else -2", "-2"),
+        ("if not true then -10 else 0", "0"),
+        ("if not not true then 8589934592 else 0", "8589934592"),
+        ("var a = 1; false and { a = 2; a == 1 }; a", "1"),
+        ("var a = true; true or { a = false; a }; a", "true"),
+        ("var a = true; { a = false; a } or false", "false"),
+        ("var a = 1; a + 1", "2"),
+        ("var a = 2; a * 2", "4"),
+        ("var a = 2; a / 2", "1"),
+        ("var a = 2; a == 2", "true"),
+        ("var a = 2; a != 2", "false"),
+        ("var a = 2; a < 2", "false"),
+        ("var a = 2; a > 2", "false"),
+        ("var a = 2; a <= 2", "true"),
+        ("var a = 2; a >= 2", "true"),
+        ("var a = 2; var b = 3; a + b", "5"),
+        ("var a = 2; var b = 3; a * b", "6"),
+        ("var a = 2; var b = 3; a / b", "0"),
+        ("var a = 2; var b = 3; a == b", "false"),
+        ("var a = 2; var b = 3; a != b", "true"),
+        ("var a = 2; var b = 3; a < b", "true"),
+        ("var a = 2; var b = 3; a > b", "false"),
+        ("var a = 2; var b = 3; a <= b", "true"),
+        ("var a = 2; var b = 3; a >= b", "false"),
+        ("var a = 2; var b = 3; if a < b then a + b else a - b", "5"),
+        ("var a = 2; var b = 3; if a > b then a + b else a - b", "-1"),
+        ("var a = 2; var b = 3; var c = 4; a + b + c", "9"),
+        ("var a = 2; var b = 3; var c = 4; a * b * c", "24"),
+        ("var a = 2; var b = 3; var c = 4; a / b / c", "0"),
+        ("{ var a = -2; a + 2 }", "0"),
     ]
 
 
@@ -34,7 +67,7 @@ def test_assembler_assemble(test_input: str, expected: str) -> None:
     ir_instructions = generate_ir(builtin_types, ast_node)
     asm_code = generate_assembly(ir_instructions)
 
-    program_name = f"compiled_program_{test_input.replace(' ', '_')}"
+    program_name = r"compiled_program_{test_input.replace(' ', '_')}"
     assemble(asm_code, program_name)
 
     program_path = os.path.join(root_dir, program_name)
@@ -44,4 +77,4 @@ def test_assembler_assemble(test_input: str, expected: str) -> None:
     pathlib.Path.unlink(pathlib.Path(program_path))
 
     assert result.returncode == 0
-    assert result.stdout.decode("utf-8") == f"{expected}\n"
+    assert result.stdout.decode("utf-8") == (f"{expected}\n" if expected else "")

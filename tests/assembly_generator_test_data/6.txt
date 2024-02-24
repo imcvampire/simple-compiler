@@ -1,0 +1,43 @@
+var a = 2; a / 2
+----------------
+.extern print_int
+.extern print_bool
+.extern read_int
+.global main
+.type main, @function
+
+.section .text
+
+main:
+pushq %rbp
+movq %rsp, %rbp
+subq $64, %rsp
+
+.LStart:
+
+# LoadIntConst(2, v0)
+movq $2, -8(%rbp)
+
+# Copy(v0, v1)
+movq -8(%rbp), %rax
+movq %rax, -16(%rbp)
+
+# LoadIntConst(2, v2)
+movq $2, -24(%rbp)
+
+# Call(/, [v1, v2], v3)
+movq -16(%rbp), %rax
+cqto
+idivq -24(%rbp)
+movq %rax, -40(%rbp)
+
+# Call(print_int, [v3], v4)
+movq -40(%rbp), %rdi
+call print_int
+movq %rax, -56(%rbp)
+
+# Return()
+movq $0, %rax
+movq %rbp, %rsp
+popq %rbp
+ret

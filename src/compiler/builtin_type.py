@@ -17,6 +17,8 @@ builtin_types: dict[IRVar, Type] = {
         "!=",
         "and",
         "or",
+        "unary_-",
+        "unary_not",
         "print_int",
         "print_bool",
     ]
