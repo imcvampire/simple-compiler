@@ -19,7 +19,8 @@ from compiler.type import Int, Type, Bool, Unit
 from compiler.type_checker_exception import (
     UnknownTypeException,
     IncompatibleTypeException,
-    UnknownOperator,
+    UnknownOperatorException,
+    UnknownIdentifierException,
 )
 
 
@@ -106,7 +107,7 @@ def __typecheck(
                     if node.op in operator:
                         return func([t1, t2])
 
-            raise UnknownOperator(f"Unknown operator: {node.op}")
+            raise UnknownOperatorException(f"Unknown operator: {node.op}")
         case FunctionExpression():
             types = [typecheck(arg, identifier_types) for arg in node.arguments]
             for operator, func in operator_types:
@@ -149,10 +150,10 @@ def __typecheck(
             return identifier_types[node.name]
         case Identifier():
             if identifier_types is None:
-                raise UnknownTypeException(f"Unknown identifier: {node.name}")
+                raise UnknownIdentifierException("identifier_types must not be None")
 
             if node.name not in identifier_types.keys():
-                raise UnknownTypeException(f"Unknown identifier: {node.name}")
+                raise UnknownIdentifierException(f"Unknown identifier: {node.name}")
 
             return identifier_types[node.name]
         case BlockExpression():
@@ -165,4 +166,5 @@ def __typecheck(
 
             return typecheck(node.result, _identifier_types)
 
-    raise UnknownTypeException(f"Unknown type: {node}")
+        case _:
+            raise Exception(f"Unsupported expression: {type(node)}")

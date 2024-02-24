@@ -1,5 +1,6 @@
 import pytest
 
+from compiler.builtin_type import builtin_types
 from compiler.ir import (
     LoadIntConst,
     Instruction,
@@ -203,4 +204,4 @@ def test_generate_ir(test_input: str, expected: list[Instruction]) -> None:
     node = parse(Tokens(tokenize(test_input)))
     typecheck(node)
 
-    assert generate_ir({}, node) == expected
+    assert generate_ir(builtin_types, node) == expected

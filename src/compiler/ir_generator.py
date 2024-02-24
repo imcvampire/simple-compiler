@@ -18,8 +18,6 @@ from compiler.type import Bool, Int, Type, Unit
 
 
 def generate_ir(
-    # 'root_types' parameter should map all global names
-    # like 'print_int' and '+' to their types.
     root_types: dict[IRVar, Type],
     root_expr: ast.Expression,
 ) -> list[ir.Instruction]:
@@ -256,11 +254,13 @@ def __generate_ir(
                     return var_result
 
             case ast.BlockExpression():
+                child_st = SymTab(symbols=[], parent=st)
+
                 for subexpr in expr.expressions:
-                    visit(st, subexpr)
+                    visit(child_st, subexpr)
 
                 if expr.result is not None:
-                    return visit(st, expr.result)
+                    return visit(child_st, expr.result)
 
             case ast.VariableDeclarationExpression():
                 var_value = visit(st, expr.value)
@@ -284,8 +284,6 @@ def __generate_ir(
 
             case _:
                 raise Exception(f"{loc}: unsupported expression: {type(expr)}")
-
-        # Other AST node cases (see below)
 
     # Convert 'root_types' into a SymTab
     # that maps all available global names to

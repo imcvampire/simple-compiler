@@ -36,26 +36,6 @@ class SymTab:
         return None
 
     def require(self, name: str) -> IRVar:
-        # built-in functions
-        if name in [
-            "=",
-            "+",
-            "-",
-            "*",
-            "/",
-            ">",
-            "<",
-            ">=",
-            "<=",
-            "==",
-            "!=",
-            "and",
-            "or",
-            "print_int",
-            "print_bool",
-        ]:
-            return IRVar(name)
-
         result = self.find(name)
 
         if result is None:

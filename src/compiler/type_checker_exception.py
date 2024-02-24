@@ -6,5 +6,9 @@ class IncompatibleTypeException(Exception):
     pass
 
 
-class UnknownOperator(Exception):
+class UnknownOperatorException(Exception):
+    pass
+
+
+class UnknownIdentifierException(Exception):
     pass

@@ -15,7 +15,7 @@ def assemble(
 ) -> None:
     """Invokes 'as' and 'ld' to generate an executable from Assembly code."""
     cm: ContextManager[str] = (
-        nullcontext(workdir) # type: ignore
+        nullcontext(workdir)  # type: ignore
         if workdir is not None
         else tempfile.TemporaryDirectory(prefix="compiler_")
     )

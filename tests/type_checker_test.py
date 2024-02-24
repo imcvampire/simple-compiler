@@ -10,6 +10,7 @@ from compiler.type_checker import typecheck
 from compiler.type_checker_exception import (
     IncompatibleTypeException,
     UnknownTypeException,
+    UnknownIdentifierException,
 )
 
 
@@ -52,9 +53,10 @@ def error_cases() -> list[tuple[str, typing.Type[Exception]]]:
         ("print_int(true)", IncompatibleTypeException),
         ("print_bool(1)", IncompatibleTypeException),
         ("var a = 1; \n a = true", IncompatibleTypeException),
-        ("a = 1", UnknownTypeException),
-        ("var a = 1; \n b = true", UnknownTypeException),
+        ("a = 1", UnknownIdentifierException),
+        ("var a = 1; \n b = true", UnknownIdentifierException),
         ("var a: Bool = 1", IncompatibleTypeException),
+        ("{ var a = true; { b = true } }", UnknownIdentifierException),
     ]
 
 

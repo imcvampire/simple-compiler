@@ -2,6 +2,7 @@ import sys
 
 from compiler.assembler import assemble
 from compiler.assembly_generator import generate_assembly
+from compiler.builtin_type import builtin_types
 from compiler.ir_generator import generate_ir
 from compiler.parser import parse
 from compiler.token import Tokens
@@ -57,7 +58,7 @@ def main() -> int:
         tokens = tokenize(source_code)
         ast_node = parse(Tokens(tokens))
         typecheck(ast_node)
-        ir_instructions = generate_ir({}, ast_node)
+        ir_instructions = generate_ir(builtin_types, ast_node)
         asm_code = generate_assembly(ir_instructions)
         print(asm_code)
     elif command == "run":
@@ -65,7 +66,7 @@ def main() -> int:
         tokens = tokenize(source_code)
         ast_node = parse(Tokens(tokens))
         typecheck(ast_node)
-        ir_instructions = generate_ir({}, ast_node)
+        ir_instructions = generate_ir(builtin_types, ast_node)
         asm_code = generate_assembly(ir_instructions)
         assemble(asm_code, "compiled_program")
     else:
