@@ -464,6 +464,22 @@ def cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            "var a = -1",
+            VariableDeclarationExpression(
+                name="a", value=BinaryOp(left=None, op="-", right=Literal(1))
+            ),
+        ),
+        (
+            "if not true then { 1 }",
+            IfExpression(
+                condition=BinaryOp(left=None, op="not", right=Literal(True)),
+                then_clause=BlockExpression(
+                    expressions=[],
+                    result=Literal(1),
+                ),
+            ),
+        ),
+        (
             "",
             Literal(None),
         ),

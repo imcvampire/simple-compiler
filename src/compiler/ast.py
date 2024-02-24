@@ -38,7 +38,7 @@ class Identifier(Expression):
 
 @dataclass
 class BinaryOp(Expression):
-    left: Expression
+    left: Expression | None
     op: str
     right: Expression
 

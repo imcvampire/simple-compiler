@@ -29,7 +29,7 @@ left_associative_binary_operators = [
     ["==", "!="],
     ["<", "<=", ">", ">="],
     ["+", "-"],
-    ["*", "/"],
+    ["*", "/", "%"],
 ]
 
 
@@ -186,6 +186,9 @@ def parse(tokens: Tokens) -> Expression:
             return parse_variable_declaration_expression()
         elif tokens.peek().text == "if":
             return parse_if_expression()
+        elif tokens.peek().text in ["-", "not"]:
+            token = tokens.consume(tokens.peek().text)
+            return BinaryOp(None, token.text, parse_leaf_construct())
         elif tokens.peek().type == TokenType.INT_LITERAL:
             return parse_int_literal()
         elif tokens.peek().type == TokenType.BOOL_LITERAL:
@@ -207,11 +210,13 @@ def parse(tokens: Tokens) -> Expression:
             return parse_leaf_construct()
 
         left = parse_left_associative_binary_operators(level + 1)
+
         while tokens.peek().text in left_associative_binary_operators[level]:
             operator_token = tokens.consume()
             operator = operator_token.text
             right = parse_left_associative_binary_operators(level + 1)
             left = BinaryOp(left, operator, right)
+
         return left
 
     def parse_expression() -> Expression:
