@@ -9,14 +9,16 @@ from compiler.token import Tokens
 from compiler.tokenizer import tokenize
 from compiler.type_checker import typecheck
 
-# TODO(student): add more commands as needed
 usage = (
     f"""
 Usage: {sys.argv[0]} <command> [source_code_file]
 
-Command 'interpret':
-    Runs the interpreter on source code.
-
+Command 'asm':
+    Print the assembly code of source code.
+    
+Command 'compile':
+    Compile the source code.
+    
 Common arguments:
     source_code_file        Optional. Defaults to standard input if missing.
  """.strip()
