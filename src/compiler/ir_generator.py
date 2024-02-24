@@ -234,9 +234,13 @@ def __generate_ir(
                             l_else,
                         )
                     )
+
+                    var_result = new_var(expr.type)
+
                     ins.append(l_then)
 
                     var_then = visit(st, expr.then_clause)
+                    ins.append(Copy(var_then, var_result))
                     ins.append(
                         Jump(
                             l_end,
@@ -245,10 +249,11 @@ def __generate_ir(
 
                     ins.append(l_else)
                     var_else = visit(st, expr.else_clause)
+                    ins.append(Copy(var_else, var_result))
 
                     ins.append(l_end)
 
-                    return var_unit
+                    return var_result
 
             case ast.BlockExpression():
                 for subexpr in expr.expressions:

@@ -2,3 +2,7 @@
 __pycache__
 /.mypy_cache
 .coverage
+
+test.s
+test.out
+

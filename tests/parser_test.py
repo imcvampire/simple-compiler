@@ -448,6 +448,22 @@ def cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            "{ var x = true; if x then 1 else 2 }",
+            BlockExpression(
+                expressions=[
+                    VariableDeclarationExpression(
+                        name="x",
+                        value=Literal(value=True),
+                    ),
+                ],
+                result=IfExpression(
+                    condition=Identifier(name="x"),
+                    then_clause=Literal(value=1),
+                    else_clause=Literal(value=2),
+                ),
+            ),
+        ),
+        (
             "",
             Literal(None),
         ),

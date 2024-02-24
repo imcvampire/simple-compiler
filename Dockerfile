@@ -1,22 +1,22 @@
-FROM python:3.12.1
+FROM python:3.12
 
-# We are going to use the latest available pip. Not necessary for poetry issue
+RUN wget -qO - 'https://proget.makedeb.org/debian-feeds/prebuilt-mpr.pub' | gpg --dearmor | tee /usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg 1> /dev/null
+RUN echo "deb [arch=all,amd64 signed-by=/usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg] https://proget.makedeb.org prebuilt-mpr lunar" | tee /etc/apt/sources.list.d/prebuilt-mpr.list
+
+RUN apt update && apt install -y just clang
+
 RUN pip install --upgrade pip
 
 WORKDIR /app
 
 COPY .python-version pyproject.toml poetry.lock /app/
-# Poetry will be installed to that location
+
 ENV POETRY_HOME=/poetry
 
-# We ship get-poetry.py with us rather then downloading it. You can get it the way it suits you.
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
-
-# Looks like poetry fails to add itself to the Path in Docker. We add it here.
 ENV PATH="/poetry/bin:${PATH}"
 
-# Use secret to get packages from the private repo
 RUN poetry install
 
 ENTRYPOINT bash

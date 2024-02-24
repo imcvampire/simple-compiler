@@ -1,5 +1,13 @@
 import sys
 
+from compiler.assembler import assemble
+from compiler.assembly_generator import generate_assembly
+from compiler.ir_generator import generate_ir
+from compiler.parser import parse
+from compiler.token import Tokens
+from compiler.tokenizer import tokenize
+from compiler.type_checker import typecheck
+
 # TODO(student): add more commands as needed
 usage = (
     f"""
@@ -44,7 +52,22 @@ def main() -> int:
 
     if command == "interpret":
         source_code = read_source_code()
-        ...  # TODO(student)
+    elif command == "asm":
+        source_code = read_source_code()
+        tokens = tokenize(source_code)
+        ast_node = parse(Tokens(tokens))
+        typecheck(ast_node)
+        ir_instructions = generate_ir({}, ast_node)
+        asm_code = generate_assembly(ir_instructions)
+        print(asm_code)
+    elif command == "run":
+        source_code = read_source_code()
+        tokens = tokenize(source_code)
+        ast_node = parse(Tokens(tokens))
+        typecheck(ast_node)
+        ir_instructions = generate_ir({}, ast_node)
+        asm_code = generate_assembly(ir_instructions)
+        assemble(asm_code, "compiled_program")
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)
         return 1
