@@ -61,6 +61,10 @@ def cases() -> list[tuple[str, str]]:
         ("1 * 2 + 3", "5"),
         ("1 + 2 - 3", "0"),
         ("{ var a = -2; a + 2 }", "0"),
+        ("var a: Int = 1; a", "1"),
+        ("var a: Bool = false; a", "false"),
+        ("1 + if true then 2 else 3", "3"),
+        ("var a = 1; if 1 == 2 then a = 2 else a = 3; a", "3"),
     ]
 
 
