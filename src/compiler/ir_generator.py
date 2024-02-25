@@ -307,6 +307,24 @@ def __generate_ir(
 
                 return var_result
 
+            case ast.ForExpression():
+                label_start = new_label()
+                label_body = new_label()
+                label_end = new_label()
+
+                ins.append(label_start)
+
+                var_condition = visit(st, expr.condition)
+
+                ins.append(CondJump(var_condition, label_body, label_end))
+
+                ins.append(label_body)
+                visit(SymTab(symbols=[], parent=st), expr.body)
+                ins.append(Jump(label_start))
+
+                ins.append(label_end)
+
+                return var_unit
             case _:
                 raise Exception(f"{loc}: unsupported expression: {type(expr)}")
 
@@ -325,6 +343,8 @@ def __generate_ir(
         case ast.BlockExpression():
             if root_expr.result is not None:
                 add_ending_print_ir(var_final_result)
+        case ast.ForExpression():
+            pass
         case _:
             add_ending_print_ir(var_final_result)
 

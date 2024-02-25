@@ -13,14 +13,14 @@ from compiler.ast import (
     IntTypeExpression,
     BoolTypeExpression,
     UnitTypeExpression,
-    TypeExpression,
+    TypeExpression, ForExpression,
 )
 from compiler.type import Int, Type, Bool, Unit
 from compiler.type_checker_exception import (
     UnknownTypeException,
     IncompatibleTypeException,
     UnknownOperatorException,
-    UnknownIdentifierException,
+    UnknownIdentifierException, WrongNumberOfArgumentsException,
 )
 
 
@@ -29,6 +29,9 @@ def create_typecheck(
 ) -> Callable[[list[Type]], Type]:
     def _(types: list[Type]) -> Type:
         for i, t in enumerate(types):
+            if len(expected_types) <= i:
+                raise WrongNumberOfArgumentsException(f"Too many arguments. Expect {len(expected_types)}, got: {len(types)}")
+
             if t is not expected_types[i]:
                 raise IncompatibleTypeException(
                     f"Incompatible types. Expect {expected_types}, got: {types}"
@@ -63,9 +66,10 @@ operator_types: list[tuple[list[str], Callable[[list[Type]], Type]]] = [
         ["<", ">", "<=", ">=", "==", "!="],
         create_typecheck_binary_operator(["<", ">", "<=", ">=", "==", "!="], Int, Bool),
     ),
-    (["and", "or"], create_typecheck_binary_operator(["and", "or"], Bool, Bool)),
+    (["and", "or", "-", "not"], create_typecheck_binary_operator(["and", "or", "-", "not"], Bool, Bool)),
     (["print_int"], create_typecheck([Int], Int)),
     (["print_bool"], create_typecheck([Bool], Bool)),
+    (["read_int"], create_typecheck([], Int)),
 ]
 
 ast_types: list[tuple[typing.Type[TypeExpression], Type]] = [
@@ -120,6 +124,7 @@ def __typecheck(
                 # TODO: implement
                 return Unit
                 # return create_typecheck(types, [Int, Bool], Func)
+
         case IfExpression():
             t1 = typecheck(node.condition, identifier_types)
             if t1 is not Bool:
@@ -136,6 +141,7 @@ def __typecheck(
                         f"Incompatible types. Got {t2} and {t3}"
                     )
             return t2
+
         case VariableDeclarationExpression():
             if identifier_types is None:
                 identifier_types = {}
@@ -151,6 +157,7 @@ def __typecheck(
                             )
 
             return identifier_types[node.name]
+
         case Identifier():
             if identifier_types is None:
                 raise UnknownIdentifierException("identifier_types must not be None")
@@ -159,6 +166,7 @@ def __typecheck(
                 raise UnknownIdentifierException(f"Unknown identifier: {node.name}")
 
             return identifier_types[node.name]
+
         case BlockExpression():
             _identifier_types = identifier_types
             if identifier_types is None:
@@ -168,6 +176,17 @@ def __typecheck(
                 typecheck(expression, _identifier_types)
 
             return typecheck(node.result, _identifier_types)
+
+        case ForExpression():
+            condition_type = typecheck(node.condition, identifier_types)
+            if condition_type is not Bool:
+                raise IncompatibleTypeException(
+                    f"Incompatible types. Expect Bool, got: {condition_type}"
+                )
+
+            typecheck(node.body, identifier_types)
+
+            return Unit
 
         case _:
             raise Exception(f"Unsupported expression: {type(node)}")

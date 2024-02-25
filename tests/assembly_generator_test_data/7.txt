@@ -1,0 +1,31 @@
+read_int()
+----------------
+.extern print_int
+.extern print_bool
+.extern read_int
+.global main
+.type main, @function
+
+.section .text
+
+main:
+pushq %rbp
+movq %rsp, %rbp
+subq $40, %rsp
+
+.LStart:
+
+# Call(read_int, [], v0)
+call read_int
+movq %rax, -16(%rbp)
+
+# Call(print_int, [v0], v1)
+movq -16(%rbp), %rdi
+call print_int
+movq %rax, -32(%rbp)
+
+# Return()
+movq $0, %rax
+movq %rbp, %rsp
+popq %rbp
+ret

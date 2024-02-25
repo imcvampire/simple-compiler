@@ -119,11 +119,7 @@ def generate_assembly(instructions: list[ir.Instruction]) -> str:
 
                     intrinsic(args)
 
-                    emit(f"movq %rax, {locals.get_ref(insn.dest)}")
-                else:
-                    if insn.fun.name not in ["print_int", "print_bool", "read_int"]:
-                        raise UnknownFunction(f"Unknown function: {insn.fun.name}")
-
+                elif insn.fun.name in ["print_int", "print_bool"]:
                     if len(insn.args) != 1:
                         raise WrongNumberOfArguments(
                             f"Wrong number of arguments for function call: {insn.fun.name}. Expected 1, got {len(insn.args)}"
@@ -131,7 +127,17 @@ def generate_assembly(instructions: list[ir.Instruction]) -> str:
 
                     emit(f"movq {locals.get_ref(insn.args[0])}, %rdi")
                     emit(f"call {insn.fun.name}")
-                    emit(f"movq %rax, {locals.get_ref(insn.dest)}")
+                elif insn.fun.name == "read_int":
+                    if len(insn.args) != 0:
+                        raise WrongNumberOfArguments(
+                            f"Wrong number of arguments for function call: {insn.fun.name}. Expected 0, got {len(insn.args)}"
+                        )
+
+                    emit(f"call {insn.fun.name}")
+                else:
+                    raise UnknownFunction(f"Unknown function: {insn.fun.name}")
+
+                emit(f"movq %rax, {locals.get_ref(insn.dest)}")
 
             case ir.CondJump():
                 emit(f"cmpq $0, {locals.get_ref(insn.cond)}")

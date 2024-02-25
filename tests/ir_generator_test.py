@@ -252,6 +252,46 @@ def cases() -> list[tuple[str, list[Instruction]]]:
                 Return(),
             ],
         ),
+        (
+            "while true do { var a = 1; a }",
+            [
+                Label(name="Start"),
+                Label(name="L0"),
+                LoadBoolConst(value=True, dest=IRVar(name="v0")),
+                CondJump(
+                    cond=IRVar(name="v0"),
+                    then_label=Label(name="L1"),
+                    else_label=Label(name="L2"),
+                ),
+                Label(name="L1"),
+                LoadIntConst(value=1, dest=IRVar(name="v1")),
+                Copy(IRVar(name="v1"), IRVar(name="v2")),
+                Jump(label=Label(name="L0")),
+                Label(name="L2"),
+                Return(),
+            ],
+        ),
+        (
+            "var a: Int = 1; while true do { a = 1 }",
+            [
+                Label(name="Start"),
+                LoadIntConst(value=1, dest=IRVar(name="v0")),
+                Copy(IRVar(name="v0"), IRVar(name="v1")),
+                Label(name="L0"),
+                LoadBoolConst(value=True, dest=IRVar(name="v2")),
+                CondJump(
+                    cond=IRVar(name="v2"),
+                    then_label=Label(name="L1"),
+                    else_label=Label(name="L2"),
+                ),
+                Label(name="L1"),
+                LoadIntConst(value=1, dest=IRVar(name="v3")),
+                Copy(IRVar(name="v3"), IRVar(name="v1")),
+                Jump(label=Label(name="L0")),
+                Label(name="L2"),
+                Return(),
+            ],
+        ),
     ]
 
 

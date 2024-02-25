@@ -11,6 +11,7 @@ from compiler.type_checker_exception import (
     IncompatibleTypeException,
     UnknownTypeException,
     UnknownIdentifierException,
+    WrongNumberOfArgumentsException,
 )
 
 
@@ -35,6 +36,10 @@ def cases() -> list[tuple[str, Type]]:
         ("{var a: Int = 0; \n a = 1;}", Unit),
         ("if not true then 1 else 2", Int),
         ("var a = -1", Int),
+        ("var a = -true; a", Bool),
+        ("var a = not true; a", Bool),
+        ("while true do { 1 }", Unit),
+        ("read_int()", Int),
     ]
 
 
@@ -59,6 +64,10 @@ def error_cases() -> list[tuple[str, typing.Type[Exception]]]:
         ("var a = 1; \n b = true", UnknownIdentifierException),
         ("var a: Bool = 1", IncompatibleTypeException),
         ("{ var a = true; { b = true } }", UnknownIdentifierException),
+        ("while 1 do { 1 }", IncompatibleTypeException),
+        # TODO: handle this case
+        # ("var a = not 1", IncompatibleTypeException),
+        ("read_int(1)", WrongNumberOfArgumentsException),
     ]
 
 
