@@ -184,7 +184,7 @@ def __generate_ir(
 
                         ins.append(Copy(var_right, var_left))
 
-                        return var_unit
+                        return var_left
                     case "and":
                         return handle_logical_operation(st, expr, "and")
                     case "or":

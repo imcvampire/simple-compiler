@@ -174,6 +174,7 @@ def cases() -> list[tuple[str, list[Instruction]]]:
                 Copy(IRVar("v2"), IRVar("v3")),
                 LoadIntConst(3, IRVar("v4")),
                 Copy(IRVar("v4"), IRVar("v1")),
+                Call(IRVar("print_int"), [IRVar("v1")], IRVar("v5")),
                 Return(),
             ],
         ),

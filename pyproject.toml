@@ -8,12 +8,13 @@ packages = [{include = "compiler", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-coverage = "^7.4.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.1.0"
 mypy = "^1.7.0"
 pytest = "^7.4.2"
+coverage = "^7.4.1"
+graphviz = "^0.20.1"
 
 [tool.poetry.scripts]
 main = "compiler.__main__:main"
