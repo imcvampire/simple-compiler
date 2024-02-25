@@ -12,7 +12,7 @@ from compiler.ast import (
     VariableDeclarationExpression,
     Identifier,
     BoolTypeExpression,
-    IntTypeExpression,
+    IntTypeExpression, ForExpression,
 )
 from compiler.parser_exception import (
     EndOfInputException,
@@ -79,7 +79,7 @@ def parse(tokens: Tokens) -> Expression:
             tokens.consume(")")
             return expr
 
-    def parse_block_expression() -> Expression:
+    def parse_block_expression() -> BlockExpression:
         tokens.consume("{")
 
         nested_expressions = []
@@ -177,6 +177,14 @@ def parse(tokens: Tokens) -> Expression:
 
             return FunctionExpression(function_name, arguments)
 
+    def parse_while_expression() -> Expression:
+        with scope(Scope.LOCAL):
+            tokens.consume("while")
+            condition = parse_expression()
+            tokens.consume("do")
+            body = parse_block_expression()
+            return ForExpression(condition, body)
+
     def parse_leaf_construct() -> Expression:
         if tokens.peek().text == "(":
             return parse_parenthesized_expression()
@@ -186,6 +194,8 @@ def parse(tokens: Tokens) -> Expression:
             return parse_variable_declaration_expression()
         elif tokens.peek().text == "if":
             return parse_if_expression()
+        elif tokens.peek().text == "while":
+            return parse_while_expression()
         elif tokens.peek().text in ["-", "not"]:
             token = tokens.consume(tokens.peek().text)
             return BinaryOp(None, token.text, parse_leaf_construct())

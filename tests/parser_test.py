@@ -13,6 +13,7 @@ from compiler.ast import (
     Identifier,
     IntTypeExpression,
     BoolTypeExpression,
+    ForExpression,
 )
 from compiler.parser import parse
 from compiler.parser_exception import (
@@ -500,6 +501,33 @@ def cases() -> list[tuple[str, Expression]]:
                     left=Identifier("a"),
                     op="=",
                     right=BinaryOp(left=Literal(1), op="+", right=Literal(2)),
+                ),
+            ),
+        ),
+        (
+            "while true do { var a = 1 }",
+            ForExpression(
+                condition=Literal(True),
+                body=BlockExpression(
+                    result=VariableDeclarationExpression(
+                        name="a",
+                        value=Literal(1),
+                    ),
+                ),
+            ),
+        ),
+        (
+            "while true do { var a = 1; a = 2; }",
+            ForExpression(
+                condition=Literal(True),
+                body=BlockExpression(
+                    expressions=[
+                        VariableDeclarationExpression(
+                            name="a",
+                            value=Literal(1),
+                        ),
+                        BinaryOp(left=Identifier("a"), op="=", right=Literal(2)),
+                    ]
                 ),
             ),
         ),

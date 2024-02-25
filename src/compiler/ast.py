@@ -67,3 +67,13 @@ class VariableDeclarationExpression(Expression):
     name: str
     value: Expression
     type_expression: Optional[TypeExpression | None] = None
+
+
+@dataclass
+class ForExpression(Expression):
+    condition: Expression
+    body: BlockExpression
+    # TODO
+    # initial: Optional[Expression] = None
+    # increment: Optional[Expression] = None
+
