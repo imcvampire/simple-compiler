@@ -14,7 +14,7 @@ from compiler.ast import (
     BoolTypeExpression,
     UnitTypeExpression,
     TypeExpression,
-    ForExpression,
+    WhileExpression,
 )
 from compiler.type import Int, Type, Bool, Unit
 from compiler.type_checker_exception import (
@@ -184,7 +184,7 @@ def __typecheck(
 
             return typecheck(node.result, _identifier_types)
 
-        case ForExpression():
+        case WhileExpression():
             condition_type = typecheck(node.condition, identifier_types)
             if condition_type is not Bool:
                 raise IncompatibleTypeException(

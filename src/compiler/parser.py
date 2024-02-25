@@ -13,7 +13,7 @@ from compiler.ast import (
     Identifier,
     BoolTypeExpression,
     IntTypeExpression,
-    ForExpression,
+    WhileExpression,
 )
 from compiler.parser_exception import (
     EndOfInputException,
@@ -185,7 +185,7 @@ def parse(tokens: Tokens) -> Expression:
             condition = parse_expression()
             tokens.consume("do")
             body = parse_block_expression()
-            return ForExpression(condition, body)
+            return WhileExpression(condition, body)
 
     def parse_leaf_construct() -> Expression:
         if tokens.peek().text == "(":

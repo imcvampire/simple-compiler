@@ -307,7 +307,7 @@ def __generate_ir(
 
                 return var_result
 
-            case ast.ForExpression():
+            case ast.WhileExpression():
                 label_start = new_label()
                 label_body = new_label()
                 label_end = new_label()
@@ -343,7 +343,7 @@ def __generate_ir(
         case ast.BlockExpression():
             if root_expr.result is not None:
                 add_ending_print_ir(var_final_result)
-        case ast.ForExpression():
+        case ast.WhileExpression():
             pass
         case _:
             add_ending_print_ir(var_final_result)

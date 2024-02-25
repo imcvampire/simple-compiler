@@ -70,9 +70,6 @@ class VariableDeclarationExpression(Expression):
 
 
 @dataclass
-class ForExpression(Expression):
+class WhileExpression(Expression):
     condition: Expression
     body: BlockExpression
-    # TODO
-    # initial: Optional[Expression] = None
-    # increment: Optional[Expression] = None

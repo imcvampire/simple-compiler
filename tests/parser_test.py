@@ -13,7 +13,7 @@ from compiler.ast import (
     Identifier,
     IntTypeExpression,
     BoolTypeExpression,
-    ForExpression,
+    WhileExpression,
 )
 from compiler.parser import parse
 from compiler.parser_exception import (
@@ -506,7 +506,7 @@ def cases() -> list[tuple[str, Expression]]:
         ),
         (
             "while true do { var a = 1 }",
-            ForExpression(
+            WhileExpression(
                 condition=Literal(True),
                 body=BlockExpression(
                     result=VariableDeclarationExpression(
@@ -518,7 +518,7 @@ def cases() -> list[tuple[str, Expression]]:
         ),
         (
             "while true do { var a = 1; a = 2; }",
-            ForExpression(
+            WhileExpression(
                 condition=Literal(True),
                 body=BlockExpression(
                     expressions=[
