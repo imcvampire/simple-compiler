@@ -127,7 +127,11 @@ def parse(tokens: Tokens) -> Expression:
                 f"{tokens.peek().location}: variable declaration is not in local scope here"
             )
 
-        tokens.consume("var")
+        if (kind := tokens.peek().text) not in ["var", "const"]:
+            raise Exception(f"{tokens.peek().location}: expected a var or const keyword")
+
+        tokens.consume(kind)
+
         name = tokens.consume().text
         var_type: Optional[IntTypeExpression | BoolTypeExpression] = None
         if tokens.peek().text == ":":
@@ -146,7 +150,7 @@ def parse(tokens: Tokens) -> Expression:
 
         tokens.consume("=")
         value = parse_left_associative_binary_operators(1)
-        return VariableDeclarationExpression(name, value, var_type)
+        return VariableDeclarationExpression(name, value, var_type, kind == "const")
 
     def parse_if_expression() -> Expression:
         with scope(Scope.LOCAL):
@@ -192,7 +196,7 @@ def parse(tokens: Tokens) -> Expression:
             return parse_parenthesized_expression()
         elif tokens.peek().text == "{":
             return parse_block_expression()
-        elif tokens.peek().text == "var":
+        elif tokens.peek().text in ["var", "const"]:
             return parse_variable_declaration_expression()
         elif tokens.peek().text == "if":
             return parse_if_expression()

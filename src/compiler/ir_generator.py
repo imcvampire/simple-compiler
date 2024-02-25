@@ -14,7 +14,7 @@ from compiler.ir import (
     LoadBoolConst,
     LoadIntConst,
 )
-from compiler.type import Bool, Int, Type, Unit
+from compiler.type import Bool, Int, Type, Unit, ConstInt, ConstBool
 
 
 def generate_ir(
@@ -59,9 +59,7 @@ def __generate_ir(
     ins: list[ir.Instruction] = []
 
     def add_ending_print_ir(var_final: IRVar) -> None:
-        # if var_final is None:
-        #     return
-        if var_types[var_final] == Int:
+        if var_types[var_final] in [Int, ConstInt]:
             ins.append(
                 Call(
                     # loc,
@@ -70,7 +68,7 @@ def __generate_ir(
                     new_var(Int),
                 )
             )
-        elif var_types[var_final] == Bool:
+        elif var_types[var_final] in [Bool, ConstBool]:
             ins.append(
                 Call(
                     # loc,

@@ -16,7 +16,7 @@ from compiler.ast import (
     TypeExpression,
     WhileExpression,
 )
-from compiler.type import Int, Type, Bool, Unit
+from compiler.type import Int, Type, Bool, Unit, ConstType, PrimitiveType
 from compiler.type_checker_exception import (
     UnknownTypeException,
     IncompatibleTypeException,
@@ -56,7 +56,7 @@ def create_typecheck_binary_operator(
 
 
 def typecheck_equal_operator(types: tuple[Type, Type]) -> Type:
-    if types[0] is types[1]:
+    if types[0] == types[1]:
         return types[0]
 
     raise IncompatibleTypeException(
@@ -153,17 +153,20 @@ def __typecheck(
             if identifier_types is None:
                 identifier_types = {}
 
-            identifier_types[node.name] = typecheck(node.value, identifier_types)
+            node_type = typecheck(node.value, identifier_types)
+            if node.is_const:
+                node_type = ConstType(node_type.name)
 
             if node.type is not None:
                 for type_expression, _type in ast_types:
                     if isinstance(node.type_expression, type_expression):
-                        if identifier_types[node.name] is not _type:
+                        if node_type is not _type:
                             raise IncompatibleTypeException(
-                                f"Incompatible types. Expect {_type}, got: {identifier_types[node.name]}"
+                                f"Incompatible types. Expect {_type}, got: {node_type}"
                             )
 
-            return identifier_types[node.name]
+            identifier_types[node.name] = node_type
+            return node_type
 
         case Identifier():
             if identifier_types is None:

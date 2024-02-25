@@ -5,7 +5,7 @@ import pytest
 from compiler.parser import parse
 from compiler.token import Tokens
 from compiler.tokenizer import tokenize
-from compiler.type import Int, Bool, Type, Unit
+from compiler.type import Int, Bool, Type, Unit, ConstInt, ConstBool
 from compiler.type_checker import typecheck
 from compiler.type_checker_exception import (
     IncompatibleTypeException,
@@ -40,6 +40,8 @@ def cases() -> list[tuple[str, Type]]:
         ("var a = not true; a", Bool),
         ("while true do { 1 }", Unit),
         ("read_int()", Int),
+        ("const a = 1", ConstInt),
+        ("const a = true", ConstBool),
     ]
 
 
@@ -68,6 +70,9 @@ def error_cases() -> list[tuple[str, typing.Type[Exception]]]:
         # TODO: handle this case
         # ("var a = not 1", IncompatibleTypeException),
         ("read_int(1)", WrongNumberOfArgumentsException),
+        ("const a = 1; a = 2", IncompatibleTypeException),
+        ("const a = 1; a = 1", IncompatibleTypeException),
+        ("const a = false; a = true", IncompatibleTypeException),
     ]
 
 

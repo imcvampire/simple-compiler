@@ -67,6 +67,7 @@ class VariableDeclarationExpression(Expression):
     name: str
     value: Expression
     type_expression: Optional[TypeExpression | None] = None
+    is_const: Optional[bool] = False
 
 
 @dataclass
