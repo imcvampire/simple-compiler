@@ -480,6 +480,29 @@ def cases() -> list[tuple[str, Expression]]:
             ),
         ),
         (
+            "var a = 1 + 2",
+            VariableDeclarationExpression(
+                name="a",
+                value=BinaryOp(left=Literal(1), op="+", right=Literal(2)),
+            ),
+        ),
+        (
+            "var a = 1; a = 1 + 2",
+            BlockExpression(
+                expressions=[
+                    VariableDeclarationExpression(
+                        name="a",
+                        value=Literal(1),
+                    ),
+                ],
+                result=BinaryOp(
+                    left=Identifier("a"),
+                    op="=",
+                    right=BinaryOp(left=Literal(1), op="+", right=Literal(2)),
+                ),
+            ),
+        ),
+        (
             "",
             Literal(None),
         ),

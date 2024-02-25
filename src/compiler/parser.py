@@ -143,7 +143,7 @@ def parse(tokens: Tokens) -> Expression:
                     var_type = BoolTypeExpression()
 
         tokens.consume("=")
-        value = parse_leaf_construct()
+        value = parse_left_associative_binary_operators(1)
         return VariableDeclarationExpression(name, value, var_type)
 
     def parse_if_expression() -> Expression:
@@ -219,6 +219,7 @@ def parse(tokens: Tokens) -> Expression:
 
         return left
 
+    # TODO: refactor this function to parse top level expression
     def parse_expression() -> Expression:
         left = parse_left_associative_binary_operators(1)
 
