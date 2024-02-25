@@ -1,5 +1,6 @@
 import pytest
 
+from compiler.location import L
 from compiler.token import Token, TokenType
 from compiler.tokenizer import tokenize
 
@@ -9,42 +10,42 @@ def cases() -> list[tuple[str, list[Token]]]:
         (
             "if  3\nwhile",
             [
-                Token(text="if", type=TokenType.IDENTIFIER),
-                Token(text="3", type=TokenType.INT_LITERAL),
-                Token(text="while", type=TokenType.IDENTIFIER),
+                Token(text="if", type=TokenType.IDENTIFIER, location=L),
+                Token(text="3", type=TokenType.INT_LITERAL, location=L),
+                Token(text="while", type=TokenType.IDENTIFIER, location=L),
             ],
         ),
         (
             "1 - 10 >= 1 / 1;",
             [
-                Token(text="1", type=TokenType.INT_LITERAL),
-                Token(text="-", type=TokenType.OPERATOR),
-                Token(text="10", type=TokenType.INT_LITERAL),
-                Token(text=">=", type=TokenType.OPERATOR),
-                Token(text="1", type=TokenType.INT_LITERAL),
-                Token(text="/", type=TokenType.OPERATOR),
-                Token(text="1", type=TokenType.INT_LITERAL),
-                Token(text=";", type=TokenType.PUNCTUATION),
+                Token(text="1", type=TokenType.INT_LITERAL, location=L),
+                Token(text="-", type=TokenType.OPERATOR, location=L),
+                Token(text="10", type=TokenType.INT_LITERAL, location=L),
+                Token(text=">=", type=TokenType.OPERATOR, location=L),
+                Token(text="1", type=TokenType.INT_LITERAL, location=L),
+                Token(text="/", type=TokenType.OPERATOR, location=L),
+                Token(text="1", type=TokenType.INT_LITERAL, location=L),
+                Token(text=";", type=TokenType.PUNCTUATION, location=L),
             ],
         ),
         (
             "(1 == 1) <= 1",
             [
-                Token(text="(", type=TokenType.PUNCTUATION),
-                Token(text="1", type=TokenType.INT_LITERAL),
-                Token(text="==", type=TokenType.OPERATOR),
-                Token(text="1", type=TokenType.INT_LITERAL),
-                Token(text=")", type=TokenType.PUNCTUATION),
-                Token(text="<=", type=TokenType.OPERATOR),
-                Token(text="1", type=TokenType.INT_LITERAL),
+                Token(text="(", type=TokenType.PUNCTUATION, location=L),
+                Token(text="1", type=TokenType.INT_LITERAL, location=L),
+                Token(text="==", type=TokenType.OPERATOR, location=L),
+                Token(text="1", type=TokenType.INT_LITERAL, location=L),
+                Token(text=")", type=TokenType.PUNCTUATION, location=L),
+                Token(text="<=", type=TokenType.OPERATOR, location=L),
+                Token(text="1", type=TokenType.INT_LITERAL, location=L),
             ],
         ),
         (
             "true != false",
             [
-                Token(text="true", type=TokenType.BOOL_LITERAL),
-                Token(text="!=", type=TokenType.OPERATOR),
-                Token(text="false", type=TokenType.BOOL_LITERAL),
+                Token(text="true", type=TokenType.BOOL_LITERAL, location=L),
+                Token(text="!=", type=TokenType.OPERATOR, location=L),
+                Token(text="false", type=TokenType.BOOL_LITERAL, location=L),
             ],
         ),
         (
@@ -59,22 +60,35 @@ comment. */
                     text="""/* Another
 comment. */""",
                     type=TokenType.COMMENT,
+                    location=L,
                 ),
-                Token(text="1", type=TokenType.INT_LITERAL),
-                Token(text="# dfgdfgreter", type=TokenType.COMMENT),
-                Token(text="2", type=TokenType.INT_LITERAL),
-                Token(text="// dfgfdgdfgfdggfd", type=TokenType.COMMENT),
+                Token(text="1", type=TokenType.INT_LITERAL, location=L),
+                Token(text="# dfgdfgreter", type=TokenType.COMMENT, location=L),
+                Token(text="2", type=TokenType.INT_LITERAL, location=L),
+                Token(text="// dfgfdgdfgfdggfd", type=TokenType.COMMENT, location=L),
             ],
         ),
         (
             "var a: Int = 1",
             [
-                Token(text="var", type=TokenType.IDENTIFIER),
-                Token(text="a", type=TokenType.IDENTIFIER),
-                Token(text=":", type=TokenType.PUNCTUATION),
-                Token(text="Int", type=TokenType.TYPE),
-                Token(text="=", type=TokenType.OPERATOR),
-                Token(text="1", type=TokenType.INT_LITERAL),
+                Token(text="var", type=TokenType.IDENTIFIER, location=L),
+                Token(text="a", type=TokenType.IDENTIFIER, location=L),
+                Token(text=":", type=TokenType.PUNCTUATION, location=L),
+                Token(text="Int", type=TokenType.TYPE, location=L),
+                Token(text="=", type=TokenType.OPERATOR, location=L),
+                Token(text="1", type=TokenType.INT_LITERAL, location=L),
+            ],
+        ),
+        (
+            """
+            var a = false;
+            """,
+            [
+                Token(text="var", type=TokenType.IDENTIFIER, location=L),
+                Token(text="a", type=TokenType.IDENTIFIER, location=L),
+                Token(text="=", type=TokenType.OPERATOR, location=L),
+                Token(text="false", type=TokenType.BOOL_LITERAL, location=L),
+                Token(text=";", type=TokenType.PUNCTUATION, location=L),
             ],
         ),
     ]
@@ -82,4 +96,6 @@ comment. */""",
 
 @pytest.mark.parametrize("test_input,expected", cases())
 def test_tokenize(test_input: str, expected: list[Token]) -> None:
-    assert tokenize(test_input) == expected
+    got = tokenize(test_input)
+
+    assert got == expected

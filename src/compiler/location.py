@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 
 @dataclass
 class Location:
     file: str
-    line: str
-    column: str
+    line: int
+    column: int
 
     def __eq__(self, other: object) -> bool:
         if other is L:
@@ -16,4 +17,4 @@ class Location:
         return super.__eq__(self, other)
 
 
-L = Location("file", "line", "column")
+L = Location("file", -1, -1)
