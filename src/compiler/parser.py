@@ -19,7 +19,7 @@ from compiler.parser_exception import (
     VariableCannotBeDeclaredException,
     MissingSemicolonException,
     MissingTypeException,
-    UnknownTypeException,
+    UnknownTypeException, WrongTokenException,
 )
 from compiler.token import TokenType, Tokens
 
@@ -201,7 +201,7 @@ def parse(tokens: Tokens) -> Expression:
         elif tokens.peek().type == TokenType.IDENTIFIER:
             return parse_identifier()
         else:
-            raise Exception(
+            raise WrongTokenException(
                 f"{tokens.peek().location}: wrong token, got: {tokens.peek().type}: {tokens.peek().text}"
             )
 

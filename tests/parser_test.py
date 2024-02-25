@@ -20,6 +20,7 @@ from compiler.parser_exception import (
     VariableCannotBeDeclaredException,
     MissingSemicolonException,
     MissingTypeException,
+    WrongTokenException,
 )
 from compiler.token import Tokens
 from compiler.tokenizer import tokenize
@@ -523,6 +524,8 @@ def error_cases() -> list[tuple[str, Type[Exception]]]:
         ("{ a b }", MissingSemicolonException),
         ("{ if true then { a } b c }", MissingSemicolonException),
         ("var a: Foo = 1", MissingTypeException),
+        # TODO: handle this case
+        # ("var a = 1; const b = 2;", WrongTokenException),
     ]
 
 

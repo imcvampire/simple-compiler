@@ -101,6 +101,7 @@ def cases() -> list[tuple[str, str]]:
         ("if (true and false) then 1 else 2", "2"),
         ("if (true and { var a = 1; a == 1 }) then 1 else 2", "1"),
         ("var a = 1 + 2; a", "3"),
+        ("var a = true and false; a", "false"),
     ]
 
 

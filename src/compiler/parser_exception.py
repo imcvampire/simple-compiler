@@ -16,3 +16,6 @@ class MissingTypeException(Exception):
 
 class UnknownTypeException(Exception):
     pass
+
+class WrongTokenException(Exception):
+    pass
