@@ -13,5 +13,6 @@ class UnknownOperatorException(Exception):
 class UnknownIdentifierException(Exception):
     pass
 
+
 class WrongNumberOfArgumentsException(Exception):
     pass

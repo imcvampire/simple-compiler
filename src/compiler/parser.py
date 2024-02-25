@@ -12,14 +12,16 @@ from compiler.ast import (
     VariableDeclarationExpression,
     Identifier,
     BoolTypeExpression,
-    IntTypeExpression, ForExpression,
+    IntTypeExpression,
+    ForExpression,
 )
 from compiler.parser_exception import (
     EndOfInputException,
     VariableCannotBeDeclaredException,
     MissingSemicolonException,
     MissingTypeException,
-    UnknownTypeException, WrongTokenException,
+    UnknownTypeException,
+    WrongTokenException,
 )
 from compiler.token import TokenType, Tokens
 

@@ -76,4 +76,3 @@ class ForExpression(Expression):
     # TODO
     # initial: Optional[Expression] = None
     # increment: Optional[Expression] = None
-

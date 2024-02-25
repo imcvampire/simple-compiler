@@ -24,7 +24,4 @@ builtin_unit_types: dict[IRVar, Type] = {
     ]
 }
 
-builtin_types: dict[IRVar, Type] = {
-    **builtin_unit_types,
-    IRVar("read_int"): Int
-}
+builtin_types: dict[IRVar, Type] = {**builtin_unit_types, IRVar("read_int"): Int}

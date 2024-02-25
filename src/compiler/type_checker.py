@@ -13,14 +13,16 @@ from compiler.ast import (
     IntTypeExpression,
     BoolTypeExpression,
     UnitTypeExpression,
-    TypeExpression, ForExpression,
+    TypeExpression,
+    ForExpression,
 )
 from compiler.type import Int, Type, Bool, Unit
 from compiler.type_checker_exception import (
     UnknownTypeException,
     IncompatibleTypeException,
     UnknownOperatorException,
-    UnknownIdentifierException, WrongNumberOfArgumentsException,
+    UnknownIdentifierException,
+    WrongNumberOfArgumentsException,
 )
 
 
@@ -30,7 +32,9 @@ def create_typecheck(
     def _(types: list[Type]) -> Type:
         for i, t in enumerate(types):
             if len(expected_types) <= i:
-                raise WrongNumberOfArgumentsException(f"Too many arguments. Expect {len(expected_types)}, got: {len(types)}")
+                raise WrongNumberOfArgumentsException(
+                    f"Too many arguments. Expect {len(expected_types)}, got: {len(types)}"
+                )
 
             if t is not expected_types[i]:
                 raise IncompatibleTypeException(
@@ -66,7 +70,10 @@ operator_types: list[tuple[list[str], Callable[[list[Type]], Type]]] = [
         ["<", ">", "<=", ">=", "==", "!="],
         create_typecheck_binary_operator(["<", ">", "<=", ">=", "==", "!="], Int, Bool),
     ),
-    (["and", "or", "-", "not"], create_typecheck_binary_operator(["and", "or", "-", "not"], Bool, Bool)),
+    (
+        ["and", "or", "-", "not"],
+        create_typecheck_binary_operator(["and", "or", "-", "not"], Bool, Bool),
+    ),
     (["print_int"], create_typecheck([Int], Int)),
     (["print_bool"], create_typecheck([Bool], Bool)),
     (["read_int"], create_typecheck([], Int)),
