@@ -104,6 +104,7 @@ def cases() -> list[tuple[str, str]]:
         ("var a = true and false; a", "false"),
         ("var a = 1; while (a < 10) do { a = a + 1 } a", "10"),
         ("var a = 1; var b = (a = 2); b", "2"),
+        ("var a = 1; var b = 2; a = b = 3", "3"),
     ]
 
 
