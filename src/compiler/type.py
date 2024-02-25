@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class PrimitiveType():
+class PrimitiveType:
     name: str
 
     def __eq__(self, other: object) -> bool:
@@ -15,7 +15,7 @@ class PrimitiveType():
 
 
 @dataclass(frozen=True)
-class ConstType():
+class ConstType:
     name: str
 
     def __eq__(self, other: object) -> bool:

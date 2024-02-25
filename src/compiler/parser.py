@@ -128,7 +128,9 @@ def parse(tokens: Tokens) -> Expression:
             )
 
         if (kind := tokens.peek().text) not in ["var", "const"]:
-            raise Exception(f"{tokens.peek().location}: expected a var or const keyword")
+            raise Exception(
+                f"{tokens.peek().location}: expected a var or const keyword"
+            )
 
         tokens.consume(kind)
 
