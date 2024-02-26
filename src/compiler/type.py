@@ -8,7 +8,8 @@ class PrimitiveType:
     def __eq__(self, other: object) -> bool:
         if isinstance(other, ConstType):
             return self.name == other.name
-        elif isinstance(other, PrimitiveType):
+
+        if isinstance(other, PrimitiveType):
             return self.name == other.name
 
         return False
