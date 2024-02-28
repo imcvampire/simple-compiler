@@ -35,6 +35,7 @@ def cases() -> list[tuple[str, str]]:
         ("var a = 1; a + 1", "2"),
         ("var a = 2; a * 2", "4"),
         ("var a = 2; a / 2", "1"),
+        ("var a = 2; a % 2", "0"),
         ("var a = 2; a == 2", "true"),
         ("var a = 2; a != 2", "false"),
         ("var a = 2; a < 2", "false"),
@@ -44,6 +45,7 @@ def cases() -> list[tuple[str, str]]:
         ("var a = 2; var b = 3; a + b", "5"),
         ("var a = 2; var b = 3; a * b", "6"),
         ("var a = 2; var b = 3; a / b", "0"),
+        ("var a = 2; var b = 3; a % b", "2"),
         ("var a = 2; var b = 3; a == b", "false"),
         ("var a = 2; var b = 3; a != b", "true"),
         ("var a = 2; var b = 3; a < b", "true"),
@@ -55,6 +57,7 @@ def cases() -> list[tuple[str, str]]:
         ("var a = 2; var b = 3; var c = 4; a + b + c", "9"),
         ("var a = 2; var b = 3; var c = 4; a * b * c", "24"),
         ("var a = 2; var b = 3; var c = 4; a / b / c", "0"),
+        ("var a = 2; var b = 3; var c = 4; a % b % c", "2"),
         ("var a = 8589934593; var b = 2; a * b", "17179869186"),
         ("var a = 17179869186; var b = 2; a / b", "8589934593"),
         ("1 + 2 * 3", "7"),
@@ -71,7 +74,9 @@ def cases() -> list[tuple[str, str]]:
         ("(1 - 2) * 3", "-3"),
         ("1 * (2 - 3)", "-1"),
         ("(1 + 2) / 3", "1"),
+        ("(1 + 2) % 3", "0"),
         ("1 / (2 + 3)", "0"),
+        ("1 % (2 + 3)", "1"),
         ("(1 - 2) / 3", "0"),
         ("1 / (2 - 3)", "-1"),
         ("(1 + 2) == 3", "true"),
@@ -106,6 +111,8 @@ def cases() -> list[tuple[str, str]]:
         ("var a = 1; var b = (a = 2); b", "2"),
         ("var a = 1; var b = 2; a = b = 3", "3"),
         ("const a = 1; a", "1"),
+        ("var a = 10 / 2; a", "5"),
+        ("var a = 10 % 2; a", "0"),
     ]
 
 

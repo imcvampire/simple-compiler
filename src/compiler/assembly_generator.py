@@ -6,6 +6,7 @@ from compiler.assembler_exception import (
     TooManyArguments,
     WrongNumberOfArguments,
 )
+from compiler.builtin_type import builtin_types
 from compiler.intrinsics import all_intrinsics, IntrinsicArgs
 
 byte_size = 8
@@ -30,7 +31,7 @@ class Locals:
 
     def stack_used(self) -> int:
         """Returns the number of bytes of stack space needed for the local variables."""
-        return self._stack_used
+        return self._stack_used - byte_size
 
 
 def get_all_ir_variables(instructions: list[ir.Instruction]) -> list[ir.IRVar]:
@@ -38,7 +39,9 @@ def get_all_ir_variables(instructions: list[ir.Instruction]) -> list[ir.IRVar]:
     result_set: set[ir.IRVar] = set()
 
     def add(var: ir.IRVar) -> None:
-        if var not in result_set:
+        if var not in result_set and var.name not in [
+            k.name for k in builtin_types.keys()
+        ]:
             result_list.append(var)
             result_set.add(var)
 
@@ -118,26 +121,33 @@ def generate_assembly(instructions: list[ir.Instruction]) -> str:
                     )
 
                     intrinsic(args)
-
-                elif insn.fun.name in ["print_int", "print_bool"]:
-                    if len(insn.args) != 1:
-                        raise WrongNumberOfArguments(
-                            f"Wrong number of arguments for function call: {insn.fun.name}. Expected 1, got {len(insn.args)}"
-                        )
-
-                    emit(f"movq {locals.get_ref(insn.args[0])}, %rdi")
-                    emit(f"call {insn.fun.name}")
-                elif insn.fun.name == "read_int":
-                    if len(insn.args) != 0:
-                        raise WrongNumberOfArguments(
-                            f"Wrong number of arguments for function call: {insn.fun.name}. Expected 0, got {len(insn.args)}"
-                        )
-
-                    emit(f"call {insn.fun.name}")
+                    emit(f"movq %rax, {locals.get_ref(insn.dest)}")
                 else:
-                    raise UnknownFunction(f"Unknown function: {insn.fun.name}")
+                    if locals.stack_used() % 16 != 0:
+                        emit("subq $8, %rsp")
 
-                emit(f"movq %rax, {locals.get_ref(insn.dest)}")
+                    if insn.fun.name in ["print_int", "print_bool"]:
+                        if len(insn.args) != 1:
+                            raise WrongNumberOfArguments(
+                                f"Wrong number of arguments for function call: {insn.fun.name}. Expected 1, got {len(insn.args)}"
+                            )
+
+                        emit(f"movq {locals.get_ref(insn.args[0])}, %rdi")
+                        emit(f"call {insn.fun.name}")
+                    elif insn.fun.name == "read_int":
+                        if len(insn.args) != 0:
+                            raise WrongNumberOfArguments(
+                                f"Wrong number of arguments for function call: {insn.fun.name}. Expected 0, got {len(insn.args)}"
+                            )
+
+                        emit(f"call {insn.fun.name}")
+                    else:
+                        raise UnknownFunction(f"Unknown function: {insn.fun.name}")
+
+                    emit(f"movq %rax, {locals.get_ref(insn.dest)}")
+
+                    if locals.stack_used() % 16 != 0:
+                        emit("add $8, %rsp")
 
             case ir.CondJump():
                 emit(f"cmpq $0, {locals.get_ref(insn.cond)}")

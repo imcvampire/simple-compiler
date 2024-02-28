@@ -65,7 +65,10 @@ def typecheck_equal_operator(types: tuple[Type, Type]) -> Type:
 
 
 operator_types: list[tuple[list[str], Callable[[list[Type]], Type]]] = [
-    (["+", "-", "*", "/"], create_typecheck_binary_operator(["+", "-", "*", "/"], Int)),
+    (
+        ["+", "-", "*", "/", "%"],
+        create_typecheck_binary_operator(["+", "-", "*", "/", "%"], Int),
+    ),
     (
         ["<", ">", "<=", ">=", "==", "!="],
         create_typecheck_binary_operator(["<", ">", "<=", ">=", "==", "!="], Int, Bool),

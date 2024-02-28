@@ -9,6 +9,7 @@ builtin_unit_types: dict[IRVar, Type] = {
         "-",
         "*",
         "/",
+        "%",
         ">",
         "<",
         ">=",

@@ -6,7 +6,7 @@ from compiler.token import Token, TokenType
 
 whitespace_re = re.compile(r"\s+")
 identifier_re = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
-operator_re = re.compile(r"(==?)|(!=)|(<=?)|(>=?)|\+|-|\*|/")
+operator_re = re.compile(r"(==?)|(!=)|(<=?)|(>=?)|\+|-|\*|/|%")
 int_literal_re = re.compile(r"\d+")
 bool_literal_re = re.compile(r"true|false")
 punctuation_re = re.compile(r"[(){},;:]")

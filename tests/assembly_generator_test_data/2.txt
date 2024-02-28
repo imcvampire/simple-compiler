@@ -11,7 +11,7 @@ var a = 1;
 main:
 pushq %rbp
 movq %rsp, %rbp
-subq $24, %rsp
+subq $16, %rsp
 
 .LStart:
 

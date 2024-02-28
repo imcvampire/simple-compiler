@@ -40,7 +40,6 @@ def cases() -> list[tuple[list[Instruction], list[BasicBlock]]]:
                 Label(name="Start"),
                 LoadBoolConst(False, IRVar("v0")),
                 Copy(IRVar("v0"), IRVar("v1")),
-                # v2 is or result
                 LoadBoolConst(True, IRVar("v3")),
                 CondJump(IRVar("v3"), Label("L0"), Label("L1")),
                 Label(name="L0"),
@@ -89,6 +88,24 @@ def cases() -> list[tuple[list[Instruction], list[BasicBlock]]]:
                         Return(),
                     ]
                 ),
+            ],
+        ),
+        (
+            [
+                Label("Start"),
+                LoadIntConst(1, IRVar("v0")),
+                Label("L0"),
+                LoadIntConst(2, IRVar("v1")),
+                Return(),
+            ],
+            [
+                BasicBlock(
+                    [
+                        Label("Start"),
+                        LoadIntConst(1, IRVar("v0")),
+                    ]
+                ),
+                BasicBlock([Label("L0"), LoadIntConst(2, IRVar("v1")), Return()]),
             ],
         ),
     ]

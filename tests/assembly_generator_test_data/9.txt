@@ -1,4 +1,4 @@
-{ var x = false; if x then 1 else 2 }
+{ var x = false; x = true; if x then 1 else 2 }
 ----------------
 .extern print_int
 .extern print_bool
@@ -11,7 +11,7 @@
 main:
 pushq %rbp
 movq %rsp, %rbp
-subq $48, %rsp
+subq $56, %rsp
 
 .LStart:
 
@@ -22,6 +22,13 @@ movq $0, -8(%rbp)
 movq -8(%rbp), %rax
 movq %rax, -16(%rbp)
 
+# LoadBoolConst(True, v2)
+movq $1, -24(%rbp)
+
+# Copy(v2, v1)
+movq -24(%rbp), %rax
+movq %rax, -16(%rbp)
+
 # CondJump(v1, Label(L0), Label(L1))
 cmpq $0, -16(%rbp)
 jne .LL0
@@ -29,31 +36,33 @@ jmp .LL1
 
 .LL0:
 
-# LoadIntConst(1, v3)
-movq $1, -24(%rbp)
+# LoadIntConst(1, v4)
+movq $1, -32(%rbp)
 
-# Copy(v3, v2)
-movq -24(%rbp), %rax
-movq %rax, -32(%rbp)
+# Copy(v4, v3)
+movq -32(%rbp), %rax
+movq %rax, -40(%rbp)
 
 # Jump(Label(L2))
 jmp .LL2
 
 .LL1:
 
-# LoadIntConst(2, v4)
-movq $2, -40(%rbp)
+# LoadIntConst(2, v5)
+movq $2, -48(%rbp)
 
-# Copy(v4, v2)
-movq -40(%rbp), %rax
-movq %rax, -32(%rbp)
+# Copy(v5, v3)
+movq -48(%rbp), %rax
+movq %rax, -40(%rbp)
 
 .LL2:
 
-# Call(print_int, [v2], v5)
-movq -32(%rbp), %rdi
+# Call(print_int, [v3], v6)
+subq $8, %rsp
+movq -40(%rbp), %rdi
 call print_int
-movq %rax, -48(%rbp)
+movq %rax, -56(%rbp)
+add $8, %rsp
 
 # Return()
 movq $0, %rax

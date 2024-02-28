@@ -1,4 +1,4 @@
-var a = 2; a / 2
+var a = 1 + 2
 ----------------
 .extern print_int
 .extern print_bool
@@ -15,20 +15,19 @@ subq $40, %rsp
 
 .LStart:
 
-# LoadIntConst(2, v0)
-movq $2, -8(%rbp)
+# LoadIntConst(1, v0)
+movq $1, -8(%rbp)
 
-# Copy(v0, v1)
+# LoadIntConst(2, v1)
+movq $2, -16(%rbp)
+
+# Call(+, [v0, v1], v2)
 movq -8(%rbp), %rax
-movq %rax, -16(%rbp)
+addq -16(%rbp), %rax
+movq %rax, -24(%rbp)
 
-# LoadIntConst(2, v2)
-movq $2, -24(%rbp)
-
-# Call(/, [v1, v2], v3)
-movq -16(%rbp), %rax
-cqto
-idivq -24(%rbp)
+# Copy(v2, v3)
+movq -24(%rbp), %rax
 movq %rax, -32(%rbp)
 
 # Call(print_int, [v3], v4)

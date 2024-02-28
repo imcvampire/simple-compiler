@@ -11,7 +11,7 @@
 main:
 pushq %rbp
 movq %rsp, %rbp
-subq $48, %rsp
+subq $40, %rsp
 
 .LStart:
 
