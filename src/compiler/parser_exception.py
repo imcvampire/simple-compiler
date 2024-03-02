@@ -20,3 +20,6 @@ class UnknownTypeException(Exception):
 
 class WrongTokenException(Exception):
     pass
+
+class WrongScopeException(Exception):
+    pass

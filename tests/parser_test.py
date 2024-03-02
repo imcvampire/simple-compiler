@@ -14,6 +14,8 @@ from compiler.ast import (
     IntTypeExpression,
     BoolTypeExpression,
     WhileExpression,
+    ContinueExpression,
+    BreakExpression,
 )
 from compiler.parser import parse
 from compiler.parser_exception import (
@@ -22,6 +24,7 @@ from compiler.parser_exception import (
     MissingSemicolonException,
     MissingTypeException,
     WrongTokenException,
+    WrongScopeException,
 )
 from compiler.token import Tokens
 from compiler.tokenizer import tokenize
@@ -535,6 +538,19 @@ def cases() -> list[tuple[str, Expression]]:
             "",
             Literal(None),
         ),
+        (
+            "while true do { if true then break else continue }",
+            WhileExpression(
+                condition=Literal(True),
+                body=BlockExpression(
+                    result=IfExpression(
+                        condition=Literal(True),
+                        then_clause=BreakExpression(),
+                        else_clause=ContinueExpression(),
+                    ),
+                ),
+            ),
+        ),
     ]
 
 
@@ -552,6 +568,9 @@ def error_cases() -> list[tuple[str, Type[Exception]]]:
         ("{ a b }", MissingSemicolonException),
         ("{ if true then { a } b c }", MissingSemicolonException),
         ("var a: Foo = 1", MissingTypeException),
+        ("break", WrongScopeException),
+        ("continue", WrongScopeException),
+        ("var a = 1; if true then break", WrongScopeException),
         # TODO: handle this case
         # ("var a = 1; const b = 2;", WrongTokenException),
     ]

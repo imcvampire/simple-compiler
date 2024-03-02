@@ -74,3 +74,11 @@ class VariableDeclarationExpression(Expression):
 class WhileExpression(Expression):
     condition: Expression
     body: BlockExpression
+
+@dataclass
+class BreakExpression(Expression):
+    pass
+
+@dataclass
+class ContinueExpression(Expression):
+    pass

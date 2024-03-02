@@ -1,3 +1,4 @@
+import sys
 from contextlib import contextmanager
 from enum import Enum
 from typing import Iterator, Optional
@@ -13,7 +14,7 @@ from compiler.ast import (
     Identifier,
     BoolTypeExpression,
     IntTypeExpression,
-    WhileExpression,
+    WhileExpression, BreakExpression, ContinueExpression,
 )
 from compiler.parser_exception import (
     EndOfInputException,
@@ -21,7 +22,7 @@ from compiler.parser_exception import (
     MissingSemicolonException,
     MissingTypeException,
     UnknownTypeException,
-    WrongTokenException,
+    WrongTokenException, WrongScopeException,
 )
 from compiler.token import TokenType, Tokens
 
@@ -35,26 +36,38 @@ left_associative_binary_operators = [
 ]
 
 
+# TODO: Change to class seems clearer
 class Scope(Enum):
     TOP_LEVEL = 0
     TOP_LEVEL_EXPRESSION = 1
     BLOCK = 2
     LOCAL = 3
+    WHILE = 4
 
 
 def parse(tokens: Tokens) -> Expression:
-    current_scope = Scope.TOP_LEVEL
+    __current_scopes = [Scope.TOP_LEVEL]
 
     @contextmanager
     def scope(new_scope: Scope) -> Iterator[None]:
-        nonlocal current_scope
-        prev_scope = current_scope
-
+        nonlocal __current_scopes
         try:
-            current_scope = new_scope
+            __current_scopes.append(new_scope)
             yield
         finally:
-            current_scope = prev_scope
+            __current_scopes.pop()
+
+    def has_scope(scopes: list[Scope] | Scope, recurrsive: Optional[bool] = False) -> bool:
+        if recurrsive:
+            if isinstance(scopes, list):
+                return any(s in __current_scopes for s in scopes)
+            else:
+                return scopes in __current_scopes
+        else:
+            if isinstance(scopes, list):
+                return __current_scopes[-1] in scopes
+            else:
+                return __current_scopes[-1] == scopes
 
     def parse_int_literal() -> Literal:
         if tokens.peek().type != TokenType.INT_LITERAL:
@@ -118,11 +131,11 @@ def parse(tokens: Tokens) -> Expression:
         return BlockExpression(nested_expressions, result)
 
     def parse_variable_declaration_expression() -> Expression:
-        if current_scope not in [
+        if not has_scope([
             Scope.TOP_LEVEL,
             Scope.TOP_LEVEL_EXPRESSION,
             Scope.BLOCK,
-        ]:
+        ]):
             raise VariableCannotBeDeclaredException(
                 f"{tokens.peek().location}: variable declaration is not in local scope here"
             )
@@ -186,7 +199,7 @@ def parse(tokens: Tokens) -> Expression:
             return FunctionExpression(function_name, arguments)
 
     def parse_while_expression() -> Expression:
-        with scope(Scope.LOCAL):
+        with scope(Scope.WHILE):
             tokens.consume("while")
             condition = parse_expression()
             tokens.consume("do")
@@ -211,9 +224,24 @@ def parse(tokens: Tokens) -> Expression:
             return parse_int_literal()
         elif tokens.peek().type == TokenType.BOOL_LITERAL:
             return parse_bool_literal()
+        elif tokens.peek().text in ["break", 'continue']:
+            if not has_scope(Scope.WHILE, True):
+                raise WrongScopeException(
+                    f"{tokens.peek().location}: {tokens.peek().text} statement must be used inside a while loop"
+                )
+
+            tokens.consume(tokens.peek().text)
+
+            match tokens.prev_token().text:
+                case "break":
+                    return BreakExpression()
+                case "continue":
+                    return ContinueExpression()
+                case _:
+                    sys.exit("Unreachable code")
         elif (
-            tokens.peek().type == TokenType.IDENTIFIER
-            and tokens.next_token().text == "("
+                tokens.peek().type == TokenType.IDENTIFIER
+                and tokens.next_token().text == "("
         ):
             return parse_function_call()
         elif tokens.peek().type == TokenType.IDENTIFIER:
@@ -252,7 +280,7 @@ def parse(tokens: Tokens) -> Expression:
                 operator = operator_token.text
                 right = parse_left_associative_binary_operators(1)
                 left = BinaryOp(left, operator, right)
-            elif current_scope is Scope.TOP_LEVEL and tokens.peek().text == ";":
+            elif has_scope(Scope.TOP_LEVEL) and tokens.peek().text == ";":
                 tokens.consume(";")
 
                 if tokens.peek().type == TokenType.END:
@@ -268,7 +296,7 @@ def parse(tokens: Tokens) -> Expression:
 
                 left = BlockExpression(expressions, Literal(None))
             elif (
-                current_scope is Scope.TOP_LEVEL_EXPRESSION
+                has_scope( Scope.TOP_LEVEL_EXPRESSION)
                 and tokens.peek().text == ";"
             ):
                 tokens.consume(";")
