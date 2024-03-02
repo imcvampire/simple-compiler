@@ -94,3 +94,41 @@ def create_flow_graph(blocks: list[BasicBlock]) -> dict[str, FlowNode]:
             flow_graph[next_name].prev.append(flow_graph[name])
 
     return flow_graph
+
+
+def analyze_reaching_definitions(
+    flow_graph: dict[str, FlowNode]
+) -> dict[str, set[str]]:
+    state: dict[ir.IRVar, set[int]] = {}
+
+    return {}
+
+
+def create_state(instructions: list[ir.Instruction]) -> dict[ir.IRVar, set[int]]:
+    state: dict[ir.IRVar, set[int]] = {}
+
+    for index, instruction in enumerate(instructions):
+        match instruction:
+            case ir.Copy():
+                if instruction.dest not in state:
+                    state[instruction.dest] = set()
+
+                state[instruction.dest].add(index)
+            case ir.LoadIntConst():
+                if instruction.dest not in state:
+                    state[instruction.dest] = set()
+
+                state[instruction.dest].add(index)
+            case ir.LoadBoolConst():
+                if instruction.dest not in state:
+                    state[instruction.dest] = set()
+
+                state[instruction.dest].add(index)
+            case ir.Call():
+                if instruction.dest is not None:
+                    if instruction.dest not in state:
+                        state[instruction.dest] = set()
+
+                    state[instruction.dest].add(index)
+
+    return state
