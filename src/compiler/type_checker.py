@@ -14,7 +14,7 @@ from compiler.ast import (
     BoolTypeExpression,
     UnitTypeExpression,
     TypeExpression,
-    WhileExpression,
+    WhileExpression, BreakExpression, ContinueExpression,
 )
 from compiler.type import Int, Type, Bool, Unit, ConstType, PrimitiveType
 from compiler.type_checker_exception import (
@@ -114,15 +114,15 @@ def __typecheck(
             if node.left is None:
                 return typecheck(node.right, identifier_types)
 
-            t1 = typecheck(node.left, identifier_types)
-            t2 = typecheck(node.right, identifier_types)
+            condition_type = typecheck(node.left, identifier_types)
+            then_type = typecheck(node.right, identifier_types)
 
             if node.op == "=":
-                return typecheck_equal_operator((t1, t2))
+                return typecheck_equal_operator((condition_type, then_type))
             else:
                 for operator, func in operator_types:
                     if node.op in operator:
-                        return func([t1, t2])
+                        return func([condition_type, then_type])
 
             raise UnknownOperatorException(f"Unknown operator: {node.op}")
         case FunctionExpression():
@@ -136,21 +136,24 @@ def __typecheck(
                 # return create_typecheck(types, [Int, Bool], Func)
 
         case IfExpression():
-            t1 = typecheck(node.condition, identifier_types)
-            if t1 is not Bool:
+            condition_type = typecheck(node.condition, identifier_types)
+            if condition_type is not Bool:
                 raise IncompatibleTypeException(
-                    f"Incompatible types. Expect Bool, got: {t1}"
+                    f"Incompatible types. Expect Bool, got: {condition_type}"
                 )
-            t2 = typecheck(node.then_clause, identifier_types)
+
+            then_type = typecheck(node.then_clause, identifier_types)
+
             if node.else_clause is None:
                 return Unit
-            else:
-                t3 = typecheck(node.else_clause, identifier_types)
-                if t2 is not t3:
-                    raise IncompatibleTypeException(
-                        f"Incompatible types. Got {t2} and {t3}"
-                    )
-            return t2
+
+            else_type = typecheck(node.else_clause, identifier_types)
+            if then_type is not else_type:
+                raise IncompatibleTypeException(
+                    f"Incompatible types. Got {then_type} and {else_type}"
+                )
+
+            return then_type
 
         case VariableDeclarationExpression():
             if identifier_types is None:
@@ -199,6 +202,9 @@ def __typecheck(
 
             typecheck(node.body, identifier_types)
 
+            return Unit
+
+        case BreakExpression() | ContinueExpression():
             return Unit
 
         case _:

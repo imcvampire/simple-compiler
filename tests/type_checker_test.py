@@ -43,6 +43,7 @@ def cases() -> list[tuple[str, Type]]:
         ("const a = 1", ConstInt),
         ("const a = true", ConstBool),
         ("var a = 1; const b = 2; a = b", Int),
+        ("while true do { if true then break else continue }", Unit),
     ]
 
 
