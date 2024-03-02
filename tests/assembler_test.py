@@ -149,6 +149,19 @@ def cases() -> list[tuple[str, str]]:
         ("const a = 1; a", "1"),
         ("var a = 10 / 2; a", "5"),
         ("var a = 10 % 2; a", "0"),
+        ("var a = 10; while a > 0 do { a = a - 1 } a", "0"),
+        (
+            "var a = 10; while a > 0 do { a = a - 1; print_int(a); }",
+            "9\n8\n7\n6\n5\n4\n3\n2\n1\n0",
+        ),
+        (
+            "var a = 10; while a > 0 do { a = a - 1; if a == 5 then continue; print_int(a); }",
+            "9\n8\n7\n6\n4\n3\n2\n1\n0",
+        ),
+        (
+            "var a = 10; while a > 0 do { a = a - 1; if a == 5 then break; print_int(a); }",
+            "9\n8\n7\n6",
+        ),
     ]
 
 

@@ -293,6 +293,37 @@ def cases() -> list[tuple[str, list[Instruction]]]:
                 Return(),
             ],
         ),
+        (
+            "while true do { if true then break else continue }",
+            [
+                Label(name="Start"),
+                Label(name="L0"),
+                LoadBoolConst(value=True, dest=IRVar(name="v0")),
+                CondJump(
+                    cond=IRVar(name="v0"),
+                    then_label=Label(name="L1"),
+                    else_label=Label(name="L2"),
+                ),
+                Label(name="L1"),
+                LoadBoolConst(value=True, dest=IRVar(name="v1")),
+                CondJump(
+                    cond=IRVar(name="v1"),
+                    then_label=Label(name="L3"),
+                    else_label=Label(name="L4"),
+                ),
+                Label(name="L3"),
+                Jump(label=Label(name="L2")),
+                Copy(source=IRVar(name="unit"), dest=IRVar(name="v2")),
+                Jump(label=Label(name="L5")),
+                Label(name="L4"),
+                Jump(label=Label(name="L0")),
+                Copy(source=IRVar(name="unit"), dest=IRVar(name="v2")),
+                Label(name="L5"),
+                Jump(label=Label(name="L0")),
+                Label(name="L2"),
+                Return(),
+            ],
+        ),
     ]
 
 

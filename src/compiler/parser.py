@@ -14,7 +14,9 @@ from compiler.ast import (
     Identifier,
     BoolTypeExpression,
     IntTypeExpression,
-    WhileExpression, BreakExpression, ContinueExpression,
+    WhileExpression,
+    BreakExpression,
+    ContinueExpression,
 )
 from compiler.parser_exception import (
     EndOfInputException,
@@ -22,7 +24,8 @@ from compiler.parser_exception import (
     MissingSemicolonException,
     MissingTypeException,
     UnknownTypeException,
-    WrongTokenException, WrongScopeException,
+    WrongTokenException,
+    WrongScopeException,
 )
 from compiler.token import TokenType, Tokens
 
@@ -57,7 +60,9 @@ def parse(tokens: Tokens) -> Expression:
         finally:
             __current_scopes.pop()
 
-    def has_scope(scopes: list[Scope] | Scope, recurrsive: Optional[bool] = False) -> bool:
+    def has_scope(
+        scopes: list[Scope] | Scope, recurrsive: Optional[bool] = False
+    ) -> bool:
         if recurrsive:
             if isinstance(scopes, list):
                 return any(s in __current_scopes for s in scopes)
@@ -131,11 +136,13 @@ def parse(tokens: Tokens) -> Expression:
         return BlockExpression(nested_expressions, result)
 
     def parse_variable_declaration_expression() -> Expression:
-        if not has_scope([
-            Scope.TOP_LEVEL,
-            Scope.TOP_LEVEL_EXPRESSION,
-            Scope.BLOCK,
-        ]):
+        if not has_scope(
+            [
+                Scope.TOP_LEVEL,
+                Scope.TOP_LEVEL_EXPRESSION,
+                Scope.BLOCK,
+            ]
+        ):
             raise VariableCannotBeDeclaredException(
                 f"{tokens.peek().location}: variable declaration is not in local scope here"
             )
@@ -224,7 +231,7 @@ def parse(tokens: Tokens) -> Expression:
             return parse_int_literal()
         elif tokens.peek().type == TokenType.BOOL_LITERAL:
             return parse_bool_literal()
-        elif tokens.peek().text in ["break", 'continue']:
+        elif tokens.peek().text in ["break", "continue"]:
             if not has_scope(Scope.WHILE, True):
                 raise WrongScopeException(
                     f"{tokens.peek().location}: {tokens.peek().text} statement must be used inside a while loop"
@@ -240,8 +247,8 @@ def parse(tokens: Tokens) -> Expression:
                 case _:
                     sys.exit("Unreachable code")
         elif (
-                tokens.peek().type == TokenType.IDENTIFIER
-                and tokens.next_token().text == "("
+            tokens.peek().type == TokenType.IDENTIFIER
+            and tokens.next_token().text == "("
         ):
             return parse_function_call()
         elif tokens.peek().type == TokenType.IDENTIFIER:
@@ -295,10 +302,7 @@ def parse(tokens: Tokens) -> Expression:
                         expressions.append(parse_expression())
 
                 left = BlockExpression(expressions, Literal(None))
-            elif (
-                has_scope( Scope.TOP_LEVEL_EXPRESSION)
-                and tokens.peek().text == ";"
-            ):
+            elif has_scope(Scope.TOP_LEVEL_EXPRESSION) and tokens.peek().text == ";":
                 tokens.consume(";")
                 return left
             else:

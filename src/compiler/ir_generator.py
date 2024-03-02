@@ -1,4 +1,6 @@
+import sys
 import typing
+from contextlib import contextmanager
 
 import compiler.ast as ast
 import compiler.ir as ir
@@ -14,6 +16,7 @@ from compiler.ir import (
     LoadBoolConst,
     LoadIntConst,
 )
+from compiler.ir_generator_state import IrGeneratorState, WhileIrGeneratorState
 from compiler.type import Bool, Int, Type, Unit, ConstInt, ConstBool
 
 
@@ -78,7 +81,7 @@ def __generate_ir(
                 )
             )
 
-    def handle_logical_operation(
+    def visit_logical_operation(
         st: SymTab, expr: ast.BinaryOp, operation: typing.Literal["and", "or"]
     ) -> IRVar:
         if expr.left is None:
@@ -112,6 +115,23 @@ def __generate_ir(
         ins.append(label_end)
 
         return var_result
+
+    __current_states = []
+
+    @contextmanager
+    def state(new_state: IrGeneratorState) -> typing.Iterator[None]:
+        nonlocal __current_states
+        try:
+            __current_states.append(new_state)
+            yield
+        finally:
+            __current_states.pop()
+
+    def get_state(state_type: type[IrGeneratorState]) -> IrGeneratorState | None:
+        for s in reversed(__current_states):
+            if isinstance(s, state_type):
+                return s
+        return None
 
     # This function visits an AST node,
     # appends IR instructions to 'ins',
@@ -184,9 +204,9 @@ def __generate_ir(
 
                         return var_left
                     case "and":
-                        return handle_logical_operation(st, expr, "and")
+                        return visit_logical_operation(st, expr, "and")
                     case "or":
-                        return handle_logical_operation(st, expr, "or")
+                        return visit_logical_operation(st, expr, "or")
                     case _:
                         if expr.left is None:
                             var_right = visit(st, expr.right)
@@ -317,12 +337,32 @@ def __generate_ir(
                 ins.append(CondJump(var_condition, label_body, label_end))
 
                 ins.append(label_body)
-                visit(SymTab(symbols=[], parent=st), expr.body)
+
+                with state(WhileIrGeneratorState(label_start, label_end)):
+                    visit(SymTab(symbols=[], parent=st), expr.body)
+
                 ins.append(Jump(label_start))
 
                 ins.append(label_end)
 
                 return var_unit
+
+            case ast.BreakExpression() | ast.ContinueExpression():
+                s = get_state(WhileIrGeneratorState)
+
+                if s is None:
+                    raise Exception(f"{loc}: break/continue outside of a loop")
+                else:
+                    match expr:
+                        case ast.BreakExpression():
+                            ins.append(Jump(s.label_end))
+                        case ast.ContinueExpression():
+                            ins.append(Jump(s.label_start))
+                        case _:
+                            sys.exit("Unreachable code")
+
+                    return var_unit
+
             case _:
                 raise Exception(f"{loc}: unsupported expression: {type(expr)}")
 

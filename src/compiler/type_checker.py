@@ -14,7 +14,9 @@ from compiler.ast import (
     BoolTypeExpression,
     UnitTypeExpression,
     TypeExpression,
-    WhileExpression, BreakExpression, ContinueExpression,
+    WhileExpression,
+    BreakExpression,
+    ContinueExpression,
 )
 from compiler.type import Int, Type, Bool, Unit, ConstType, PrimitiveType
 from compiler.type_checker_exception import (
