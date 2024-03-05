@@ -11,7 +11,7 @@ from compiler.type_checker import typecheck
 
 usage = (
     f"""
-Usage: {sys.argv[0]} <command> [source_code_file]
+Usage: {sys.argv[0]} <command> [source_code_file] [additional_arguments]
 
 Command 'asm':
     Print the assembly code of source code.
@@ -19,9 +19,12 @@ Command 'asm':
 Command 'compile':
     Compile the source code.
     
+    Arguments:
+        compiled_file           Optional. Defaults to compiled_program if missing.
+    
 Common arguments:
     source_code_file        Optional. Defaults to standard input if missing.
- """.strip()
+""".strip()
     + "\n"
 )
 
@@ -29,6 +32,7 @@ Common arguments:
 def main() -> int:
     command: str | None = None
     input_file: str | None = None
+    output_file: str | None = None
     for arg in sys.argv[1:]:
         if arg in ["-h", "--help"]:
             print(usage)
@@ -39,6 +43,8 @@ def main() -> int:
             command = arg
         elif input_file is None:
             input_file = arg
+        elif output_file is None:
+            output_file = arg
         else:
             raise Exception("Multiple input files not supported")
 
@@ -63,14 +69,14 @@ def main() -> int:
         ir_instructions = generate_ir(builtin_types, ast_node)
         asm_code = generate_assembly(ir_instructions)
         print(asm_code)
-    elif command == "run":
+    elif command == "compile":
         source_code = read_source_code()
         tokens = tokenize(source_code)
         ast_node = parse(Tokens(tokens))
         typecheck(ast_node)
         ir_instructions = generate_ir(builtin_types, ast_node)
         asm_code = generate_assembly(ir_instructions)
-        assemble(asm_code, "compiled_program")
+        assemble(asm_code, output_file if output_file is None else "compiled_program")
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)
         return 1
