@@ -76,7 +76,7 @@ def main() -> int:
         typecheck(ast_node)
         ir_instructions = generate_ir(builtin_types, ast_node)
         asm_code = generate_assembly(ir_instructions)
-        assemble(asm_code, output_file if output_file is None else "compiled_program")
+        assemble(asm_code, "compiled_program" if output_file is None else output_file)
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)
         return 1

@@ -381,7 +381,7 @@ def __generate_ir(
         case ast.BlockExpression():
             if root_expr.result is not None:
                 add_ending_print_ir(var_final_result)
-        case ast.WhileExpression():
+        case ast.WhileExpression() | ast.VariableDeclarationExpression():
             pass
         case _:
             add_ending_print_ir(var_final_result)

@@ -3,3 +3,4 @@
 + Implement const
 + Implement break and continue
 - Add Location to all steps
+- Constant propagation

@@ -29,6 +29,7 @@ def cases() -> list[tuple[str, str]]:
         ("if 1 >= 2 then -1 else -2", "-2"),
         ("if not true then -10 else 0", "0"),
         ("if not not true then 8589934592 else 0", "8589934592"),
+        ("var a = 1;", ""),
         ("var a = 1; false and { a = 2; a == 1 }; a", "1"),
         ("var a = true; true or { a = false; a }; a", "true"),
         ("var a = true; { a = false; a } or false", "false"),
