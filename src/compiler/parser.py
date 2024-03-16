@@ -122,13 +122,15 @@ def parse(tokens: Tokens) -> Expression:
                 else:
                     if tokens.peek().text == ";":
                         tokens.consume(";")
+                    elif isinstance(nested_expression, BlockExpression|WhileExpression):
+                        pass
                     else:
                         result = nested_expressions.pop()
                         break
 
         if tokens.peek().text != "}":
             raise MissingSemicolonException(
-                f"{tokens.peek().location}: expected a semicolon"
+                f"{tokens.peek().location}: expected a closing brace"
             )
 
         tokens.consume("}")

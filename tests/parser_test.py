@@ -551,6 +551,91 @@ def cases() -> list[tuple[str, Expression]]:
                 ),
             ),
         ),
+        (
+            """
+            var a = 0;
+            while a < 10 do {
+                var b = 0;
+                while b < 10 do {
+                    print_int(b);
+                    b = b + 1;
+                    
+                    if b == 5 then break;
+                }
+                a = a + 1;
+            }
+            """,
+            BlockExpression(
+                expressions=[
+                    VariableDeclarationExpression(
+                        name="a",
+                        value=Literal(value=0),
+                        type_expression=None,
+                        is_const=False,
+                    ),
+                    WhileExpression(
+                        condition=BinaryOp(
+                            left=Identifier(name="a"), op="<", right=Literal(value=10)
+                        ),
+                        body=BlockExpression(
+                            expressions=[
+                                VariableDeclarationExpression(
+                                    name="b",
+                                    value=Literal(value=0),
+                                    type_expression=None,
+                                    is_const=False,
+                                ),
+                                WhileExpression(
+                                    condition=BinaryOp(
+                                        left=Identifier(name="b"),
+                                        op="<",
+                                        right=Literal(value=10),
+                                    ),
+                                    body=BlockExpression(
+                                        expressions=[
+                                            FunctionExpression(
+                                                name="print_int",
+                                                arguments=[Identifier(name="b")],
+                                            ),
+                                            BinaryOp(
+                                                left=Identifier(name="b"),
+                                                op="=",
+                                                right=BinaryOp(
+                                                    left=Identifier(name="b"),
+                                                    op="+",
+                                                    right=Literal(value=1),
+                                                ),
+                                            ),
+                                            IfExpression(
+                                                condition=BinaryOp(
+                                                    left=Identifier(name="b"),
+                                                    op="==",
+                                                    right=Literal(value=5),
+                                                ),
+                                                then_clause=BreakExpression(),
+                                                else_clause=None,
+                                            ),
+                                        ],
+                                        result=Literal(value=None),
+                                    ),
+                                ),
+                                BinaryOp(
+                                    left=Identifier(name="a"),
+                                    op="=",
+                                    right=BinaryOp(
+                                        left=Identifier(name="a"),
+                                        op="+",
+                                        right=Literal(value=1),
+                                    ),
+                                ),
+                            ],
+                            result=Literal(value=None),
+                        ),
+                    ),
+                ],
+                result=Literal(value=None),
+            ),
+        ),
     ]
 
 

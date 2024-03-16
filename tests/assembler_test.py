@@ -163,6 +163,22 @@ def cases() -> list[tuple[str, str]]:
             "var a = 10; while a > 0 do { a = a - 1; if a == 5 then break; print_int(a); }",
             "9\n8\n7\n6",
         ),
+        (
+            """
+            var a = 0;
+            while a < 5 do {
+                var b = 0;
+                while b < 3 do {
+                    print_int(b);
+                    b = b + 1;
+                    
+                    if (a == 2 and b == 2) then break;
+                }
+                a = a + 1;
+            }
+            """,
+            "0\n1\n2\n0\n1\n2\n0\n1\n0\n1\n2\n0\n1\n2",
+        ),
     ]
 
 
