@@ -1,3 +1,5 @@
+# Simple compiler
+
 ## Setup
 
 ### Requirements:
